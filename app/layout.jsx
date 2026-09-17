@@ -50,7 +50,7 @@ export default function RootLayout({ children }) {
       <body className={outfit.className} style={{ fontFamily: "var(--font-outfit), Outfit, sans-serif" }}>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var d=document.documentElement,s=sessionStorage,p=location.pathname.replace(/\\/+$/,"")||"/";function take(k,a,ok){if(s.getItem(k)!=="1")return;if(ok)d.dataset[a]="1";else s.removeItem(k)}take("lystly.home-enter","homeEnter",p==="/");take("lystly.app-enter","appEnter",p.indexOf("/app")===0);take("lystly.auth-enter","authEnter",p==="/login"||p==="/signup")}catch(e){}`,
+            __html: `try{var d=document.documentElement,s=sessionStorage,p=location.pathname.replace(/\\/+$/,"")||"/";function take(k,a,ok){if(s.getItem(k)!=="1")return;if(ok)d.dataset[a]="1";else s.removeItem(k)}take("lystly.home-enter","homeEnter",p==="/");take("lystly.app-enter","appEnter",p.indexOf("/app")===0);take("lystly.auth-enter","authEnter",p==="/login"||p==="/signup"||p==="/onboarding")}catch(e){}`,
           }}
         />
         {children}

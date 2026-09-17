@@ -1,46 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LIQUID_MESH_COLORS, LiquidMesh } from "@/components/LiquidMesh";
 import { SiteLogo } from "@/components/SiteLogo";
-import {
-  afterPaint,
-  cleanAppPath,
-  clearEnterFlags,
-  isHomePath,
-  markAppEnter,
-  markHomeEnter,
-  takeAppEnter,
-  takeAuthEnter,
-} from "@/lib/app-nav.js";
+import { markAppEnter } from "@/lib/app-nav.js";
+import { useMeshPageMotion } from "@/lib/use-mesh-page-motion.js";
 import { createClient } from "@/lib/supabase/client";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 
-const MESH_IN_MS = 700;
-const UI_IN_MS = 480;
-const UI_OUT_MS = 420;
-const MESH_OUT_MS = 560;
-
-function prefersReduced() {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
 export function AuthForm({ mode }) {
-  const router = useRouter();
   const isSignup = mode === "signup";
+  const { pageClass } = useMeshPageMotion(isSignup ? "/signup" : "/login");
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
   const [pending, setPending] = useState(false);
   const [created, setCreated] = useState(false);
   const [needsConfirm, setNeedsConfirm] = useState(false);
   const [wantsDownload, setWantsDownload] = useState(false);
-  const [intro, setIntro] = useState("idle");
-  const [outro, setOutro] = useState("idle");
   const morphRef = useRef(null);
-  const outroRef = useRef(outro);
-  outroRef.current = outro;
 
   useEffect(() => {
     try {
@@ -49,81 +27,6 @@ export function AuthForm({ mode }) {
       setWantsDownload(false);
     }
   }, []);
-
-  useLayoutEffect(() => {
-    const flagged = takeAuthEnter() || takeAppEnter();
-    if (!flagged) return;
-    if (prefersReduced()) {
-      clearEnterFlags();
-      return;
-    }
-    document.documentElement.dataset.authEnter = "1";
-    setIntro("mesh");
-  }, []);
-
-  useEffect(() => {
-    if (intro !== "mesh") return undefined;
-    return afterPaint(() => setIntro("mesh-on"));
-  }, [intro]);
-
-  useEffect(() => {
-    if (intro !== "mesh-on") return undefined;
-    const timer = window.setTimeout(() => setIntro("ui-on"), MESH_IN_MS);
-    return () => window.clearTimeout(timer);
-  }, [intro]);
-
-  useEffect(() => {
-    if (intro !== "ui-on") return undefined;
-    const timer = window.setTimeout(() => {
-      setIntro("done");
-      clearEnterFlags();
-    }, UI_IN_MS);
-    return () => window.clearTimeout(timer);
-  }, [intro]);
-
-  function leaveHome() {
-    if (outroRef.current !== "idle") return;
-    if (prefersReduced()) {
-      markHomeEnter();
-      router.push("/");
-      return;
-    }
-    markHomeEnter();
-    setOutro("ui-off");
-  }
-
-  useEffect(() => {
-    function onClick(event) {
-      if (event.defaultPrevented || event.button !== 0) return;
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      const link = event.target.closest?.("a[href]");
-      if (!link) return;
-      if (link.target && link.target !== "_self") return;
-      if (link.hasAttribute("download")) return;
-      const next = new URL(link.href, window.location.href);
-      if (next.origin !== window.location.origin) return;
-      if (!isHomePath(cleanAppPath(next.pathname))) return;
-      event.preventDefault();
-      leaveHome();
-    }
-
-    document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
-  }, [router]);
-
-  useEffect(() => {
-    if (outro !== "ui-off") return undefined;
-    const timer = window.setTimeout(() => setOutro("mesh-off"), UI_OUT_MS);
-    return () => window.clearTimeout(timer);
-  }, [outro]);
-
-  useEffect(() => {
-    if (outro !== "mesh-off") return undefined;
-    const timer = window.setTimeout(() => {
-      router.push("/");
-    }, MESH_OUT_MS);
-    return () => window.clearTimeout(timer);
-  }, [outro, router]);
 
   function playCreated() {
     const el = morphRef.current;
@@ -161,8 +64,13 @@ export function AuthForm({ mode }) {
     const form = new FormData(event.currentTarget);
     const email = String(form.get("email") || "").trim();
     const password = String(form.get("password") || "");
+    const confirmPassword = String(form.get("confirm_password") || "");
     if (!email || !password) {
       setError("Enter your email and password.");
+      return;
+    }
+    if (isSignup && password !== confirmPassword) {
+      setError("Those passwords do not match.");
       return;
     }
 
@@ -209,14 +117,6 @@ export function AuthForm({ mode }) {
     }
   }
 
-  const pageClass = [
-    "auth-page",
-    intro !== "idle" && intro !== "done" ? `is-intro is-${intro}` : "",
-    outro !== "idle" ? `is-outro is-${outro}` : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
   return (
     <div className={pageClass}>
       <div className="auth-mesh">
@@ -257,6 +157,18 @@ export function AuthForm({ mode }) {
                 required
               />
             </label>
+            {isSignup ? (
+              <label>
+                Confirm password
+                <input
+                  name="confirm_password"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={6}
+                  required
+                />
+              </label>
+            ) : null}
             <button className="btn-primary" type="submit" disabled={pending}>
               {pending ? "Please wait…" : isSignup ? "Create account" : "Log in"}
             </button>

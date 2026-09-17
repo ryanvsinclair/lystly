@@ -13,7 +13,7 @@ export default async function StudioPage({ params }) {
   const [{ data: project }, brand] = await Promise.all([
     supabase
       .from("projects")
-      .select("id, title, listing_url, listing, studio")
+      .select("id, title, listing_url, listing, studio, agency_id")
       .eq("id", id)
       .maybeSingle(),
     loadProfileBrand(supabase, userId),

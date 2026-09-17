@@ -9,6 +9,17 @@ import "@/src/styles.css";
 
 const AUTOSAVE_MS = 30000;
 
+function stripSavePayload(value) {
+  if (typeof value === "string") {
+    return value.startsWith("data:image") && value.length > 256 ? "" : value;
+  }
+  if (Array.isArray(value)) return value.map(stripSavePayload).filter(Boolean);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, stripSavePayload(child)]));
+  }
+  return value;
+}
+
 export function StudioClient({ project, brand }) {
   const [saveLabel, setSaveLabel] = useState("Saved");
   const [dirty, setDirty] = useState(false);
@@ -29,23 +40,29 @@ export function StudioClient({ project, brand }) {
     setSaving(true);
     setSaveLabel("Saving…");
     try {
-      const state = await api.getPersistableStudioState();
-      const result = await saveProject(projectRef.current.id, state);
+      const { droppedPhotos, ...state } = await api.getPersistableStudioState();
+      const result = await saveProject(projectRef.current.id, stripSavePayload(state));
       if (!result?.ok) throw new Error(result?.error || "Could not save project.");
       if (dirtyRef.current) {
         setDirty(true);
         setSaveLabel("Unsaved");
       } else {
         setDirty(false);
-        setSaveLabel(source === "manual" ? "Saved" : "Autosaved");
+        setSaveLabel(
+          droppedPhotos
+            ? "Saved without photos"
+            : source === "manual"
+              ? "Saved"
+              : "Autosaved"
+        );
       }
     } catch (err) {
       dirtyRef.current = true;
       setDirty(true);
       const message = String(err?.message || "");
       setSaveLabel(
-        /unexpected response|Server Components render/i.test(message)
-          ? "Could not save. Try again."
+        /unexpected response|Server Components render|413/i.test(message)
+          ? "Photos are too large to save"
           : message || "Save failed"
       );
     } finally {
@@ -65,6 +82,15 @@ export function StudioClient({ project, brand }) {
           dirtyRef.current = true;
           setDirty(true);
           setSaveLabel("Unsaved");
+        },
+        async onUploadPhoto(file) {
+          const body = new FormData();
+          body.set("projectId", projectRef.current.id);
+          body.set("file", file);
+          const response = await fetch("/api/project-photos", { method: "POST", body });
+          const data = await response.json().catch(() => ({}));
+          if (!data?.url) throw new Error(data?.error || "Could not store that photo.");
+          return data;
         },
         async onUploadPose(slot, file) {
           const body = new FormData();

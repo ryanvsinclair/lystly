@@ -47,6 +47,7 @@ let agentScaleInput;
 let agentPosX = POSE_START_X;
 let agentPosY = 0;
 let studioHooks = {};
+let photoUploadReady = true;
 
 const HEADLINES = {
   "coming-soon": { kicker: "COMING", status: "SOON" },
@@ -1045,13 +1046,13 @@ function wrapGalleryThumb(item, url) {
   return wrap;
 }
 
-function setGalleryAddBusy(busy) {
+function setGalleryAddBusy(busy, progress = "") {
   document.querySelectorAll(".listing-gallery-add").forEach((el) => {
     el.classList.toggle("is-busy", busy);
     const label = [...el.querySelectorAll("span")].find(
       (node) => !node.classList.contains("listing-gallery-add-plus")
     );
-    if (label) label.textContent = busy ? "Adding…" : "Add photo";
+    if (label) label.textContent = busy ? progress || "Adding…" : "Add photo";
   });
 }
 
@@ -1067,15 +1068,29 @@ function isEmbeddedPhoto(url) {
 
 async function persistGalleryPhoto(file) {
   const dataUrl = await fileToDataUrl(file);
+  let next = dataUrl;
   try {
-    return await compressPhotoDataUrl(dataUrl);
+    next = await compressPhotoDataUrl(dataUrl, 1280, 0.74);
   } catch {
-    return dataUrl;
+    // Keep the original if the first pass fails.
   }
+  if (isEmbeddedPhoto(next) && next.length > 350000) {
+    try {
+      next = await compressPhotoDataUrl(next, 900, 0.6);
+    } catch {
+      // Keep the smaller of the two if the second pass fails.
+    }
+  }
+  return next;
 }
 
-async function persistLocalPhoto(file) {
-  return persistGalleryPhoto(file);
+async function dataUrlToFile(dataUrl, name = "photo.jpg") {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  const type = blob.type || "image/jpeg";
+  const ext = type === "image/png" ? "png" : type === "image/webp" ? "webp" : "jpg";
+  const base = String(name || "photo").replace(/\.[^.]+$/, "") || "photo";
+  return new File([blob], `${base}.${ext}`, { type });
 }
 
 async function shrinkEmbeddedPhoto(url) {
@@ -1087,8 +1102,49 @@ async function shrinkEmbeddedPhoto(url) {
   }
 }
 
+async function uploadLocalPhoto(dataUrl, name = "photo.jpg") {
+  if (!isEmbeddedPhoto(dataUrl)) return dataUrl;
+  const shrunk = await shrinkEmbeddedPhoto(dataUrl);
+  const upload = studioHooks.onUploadPhoto;
+  if (!upload || !photoUploadReady) return shrunk;
+  try {
+    const result = await upload(await dataUrlToFile(shrunk, name));
+    return result?.url || shrunk;
+  } catch (err) {
+    const message = String(err?.message || "");
+    if (/bucket not found|not ready/i.test(message)) photoUploadReady = false;
+    return shrunk;
+  }
+}
+
+async function persistLocalPhoto(file) {
+  return uploadLocalPhoto(await persistGalleryPhoto(file), file?.name || "photo.jpg");
+}
+
+function containsEmbeddedPhoto(value) {
+  if (typeof value === "string") return isEmbeddedPhoto(value);
+  if (Array.isArray(value)) return value.some(containsEmbeddedPhoto);
+  if (value && typeof value === "object") {
+    return Object.values(value).some(containsEmbeddedPhoto);
+  }
+  return false;
+}
+
+function stripEmbeddedPhotos(value) {
+  if (typeof value === "string") return isEmbeddedPhoto(value) ? "" : value;
+  if (Array.isArray(value)) return value.map(stripEmbeddedPhotos).filter(Boolean);
+  if (value && typeof value === "object") {
+    const next = {};
+    for (const [key, child] of Object.entries(value)) {
+      next[key] = stripEmbeddedPhotos(child);
+    }
+    return next;
+  }
+  return value;
+}
+
 async function replaceEmbeddedPhotos(value) {
-  if (typeof value === "string") return shrinkEmbeddedPhoto(value);
+  if (typeof value === "string") return uploadLocalPhoto(value);
   if (Array.isArray(value)) {
     return Promise.all(value.map(replaceEmbeddedPhotos));
   }
@@ -1105,11 +1161,14 @@ async function replaceEmbeddedPhotos(value) {
 async function attachGalleryPhotos(files) {
   const images = [...(files || [])].filter(isImageFile);
   if (!images.length) return;
-  setGalleryAddBusy(true);
+  setGalleryAddBusy(true, images.length > 1 ? `Adding 1/${images.length}` : "Adding…");
   try {
     const next = listingGalleryPhotos();
     let added = 0;
-    for (const file of images) {
+    for (const [index, file] of images.entries()) {
+      if (images.length > 1) {
+        setGalleryAddBusy(true, `Adding ${index + 1}/${images.length}`);
+      }
       const url = await persistLocalPhoto(file);
       if (!url || next.includes(url)) continue;
       next.push(url);
@@ -2283,7 +2342,14 @@ export async function getPersistableStudioState() {
     propertyUrl = studio.propertyUrl;
   }
   if (Array.isArray(studio.brochurePhotoOrder)) brochurePhotoOrder = studio.brochurePhotoOrder;
-  return { ...state, listing, studio };
+
+  const droppedPhotos = containsEmbeddedPhoto(listing) || containsEmbeddedPhoto(studio);
+  return {
+    ...state,
+    listing: droppedPhotos ? stripEmbeddedPhotos(listing) : listing,
+    studio: droppedPhotos ? stripEmbeddedPhotos(studio) : studio,
+    droppedPhotos,
+  };
 }
 
 export function applyStudioState(data = {}) {
@@ -2380,6 +2446,7 @@ export function applyBrand(brand = {}) {
 
 export function bootStudio(hooks = {}) {
   studioHooks = hooks;
+  photoUploadReady = true;
   resetStudioBindings();
   bindDom();
   mountIcons();

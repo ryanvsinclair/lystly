@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { SlideToggle } from "@/components/SlideToggle";
 import { clampAgentPosition, listingPointerScale } from "@/lib/agent-drag.js";
@@ -406,8 +405,7 @@ function BrochurePreview({ listing, agent, brand }) {
   );
 }
 
-export function HomePreview({ listing, brand = null }) {
-  const router = useRouter();
+export function HomePreview({ listing, brand = null, onNeedAuth }) {
   const frameRef = useRef(null);
   const overRef = useRef(false);
   const [mode, setMode] = useState("listing");
@@ -467,7 +465,8 @@ export function HomePreview({ listing, brand = null }) {
     } catch {
       /* ignore quota */
     }
-    router.push("/signup");
+    if (onNeedAuth) onNeedAuth("/login");
+    else window.location.assign("/login");
   }
 
   return (

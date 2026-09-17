@@ -1,0 +1,47 @@
+---
+description: Every product page change must use the existing leave/enter motion.
+alwaysApply: true
+---
+
+# Page transitions
+
+Do not add a new fade, wash, or spinner for a route change. Hook into the motion that is already there. New product pages must join this system on the first pass — never ship a hard cut.
+
+## Landing (`/`)
+
+Outside `/app`. Leave with `leaveTo` / `markLeaveHome` so the mesh can fade out, then enter `/login`, `/signup`, `/onboarding`, or `/app` with the matching enter flag.
+
+```js
+// BAD — skips the landing outro
+router.push("/login");
+
+// GOOD — landing download / CTA
+onNeedAuth("/login"); // or leaveTo("/login")
+```
+
+## Mesh pages (`/login`, `/signup`, `/onboarding`)
+
+These share the liquid mesh. Use `useMeshPageMotion(currentPath)` — do not copy the animation timers or invent a second fade.
+
+- Login ↔ signup (and other mesh ↔ mesh) must `markAuthSwap()` and swap only the card. Do not replay the full mesh intro.
+- Landing → mesh uses the full mesh enter (`markAuthEnter`).
+- Reduced motion skips the animation and navigates immediately.
+
+## In-app (`/app/*`)
+
+The app bar stays mounted. Use `useAppTransition().navigate` — never `router.push` / `window.location` between `/app` pages.
+
+```js
+// BAD — in-app hard cut
+router.push(`/app/${id}`);
+
+// GOOD
+navigate(`/app/${id}`);
+```
+
+## New pages
+
+1. If the page is under `/app`, it inherits AppTransition. Still call `navigate` for programmatic moves.
+2. If the page uses the auth mesh, call `useMeshPageMotion("/your-path")` and put the card in `.auth-stage`.
+3. Intercept same-origin links, set the enter flag, play leave, then navigate.
+4. Honor `prefers-reduced-motion`.

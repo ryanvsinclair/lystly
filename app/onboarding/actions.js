@@ -51,6 +51,7 @@ export async function lookupAgencyAction(homepage) {
   return {
     ok: true,
     exists: true,
+    homepage: normalizeHomepageUrl(homepage),
     agency: {
       id: agency.id,
       name: agency.name,

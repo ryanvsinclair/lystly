@@ -66,9 +66,20 @@ function Facts({ project }) {
   );
 }
 
-function ConfirmDelete({ project, confirm, onConfirm }) {
+function ConfirmDelete({ project, confirm, onConfirm, onDelete }) {
   return (
-    <form action={deleteProject} className="project-card-delete">
+    <form
+      className="project-card-delete"
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!confirm) {
+          onConfirm();
+          return;
+        }
+        onDelete(project);
+      }}
+    >
       <input type="hidden" name="id" value={project.id} />
       <button
         type="submit"
@@ -96,7 +107,7 @@ function ConfirmDelete({ project, confirm, onConfirm }) {
   );
 }
 
-function HairlineCard({ project }) {
+function HairlineCard({ project, onDelete }) {
   const [confirm, setConfirm] = useState(false);
   return (
     <article className="project-card is-hairline" onMouseLeave={() => setConfirm(false)}>
@@ -112,12 +123,12 @@ function HairlineCard({ project }) {
           <span className="project-card-open-label">Open</span>
         </footer>
       </a>
-      <ConfirmDelete confirm={confirm} onConfirm={() => setConfirm(true)} project={project} />
+      <ConfirmDelete confirm={confirm} onConfirm={() => setConfirm(true)} onDelete={onDelete} project={project} />
     </article>
   );
 }
 
-function SplitCard({ project }) {
+function SplitCard({ project, onDelete }) {
   const [confirm, setConfirm] = useState(false);
   return (
     <article className="project-card is-split" onMouseLeave={() => setConfirm(false)}>
@@ -135,12 +146,12 @@ function SplitCard({ project }) {
           </div>
         </div>
       </a>
-      <ConfirmDelete confirm={confirm} onConfirm={() => setConfirm(true)} project={project} />
+      <ConfirmDelete confirm={confirm} onConfirm={() => setConfirm(true)} onDelete={onDelete} project={project} />
     </article>
   );
 }
 
-function RowCard({ project }) {
+function RowCard({ project, onDelete }) {
   const [confirm, setConfirm] = useState(false);
   return (
     <article className="project-card is-row" onMouseLeave={() => setConfirm(false)}>
@@ -163,7 +174,7 @@ function RowCard({ project }) {
           </i>
         </div>
       </a>
-      <ConfirmDelete confirm={confirm} onConfirm={() => setConfirm(true)} project={project} />
+      <ConfirmDelete confirm={confirm} onConfirm={() => setConfirm(true)} onDelete={onDelete} project={project} />
     </article>
   );
 }
@@ -176,6 +187,7 @@ const CARD = {
 
 const OUT_MS = 220;
 const IN_MS = 280;
+const DELETE_MS = 320;
 
 export function ProjectsBoard({ projects }) {
   const router = useRouter();
@@ -185,14 +197,65 @@ export function ProjectsBoard({ projects }) {
   const [shown, setShown] = useState("hairline");
   const [motion, setMotion] = useState({ phase: "idle", dir: 1 });
   const [creating, setCreating] = useState(false);
+  const [items, setItems] = useState(projects);
+  const [leaving, setLeaving] = useState({});
+  const removed = useRef(new Set());
   const timers = useRef([]);
+  const deleteTimers = useRef([]);
 
   function clearTimers() {
     timers.current.forEach((id) => window.clearTimeout(id));
     timers.current = [];
   }
 
-  useEffect(() => () => clearTimers(), []);
+  useEffect(
+    () => () => {
+      clearTimers();
+      deleteTimers.current.forEach((id) => window.clearTimeout(id));
+    },
+    []
+  );
+
+  useEffect(() => {
+    setItems(projects.filter((project) => !removed.current.has(project.id)));
+  }, [projects]);
+
+  async function removeProject(project) {
+    if (!project?.id || removed.current.has(project.id)) return;
+    removed.current.add(project.id);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (reduceMotion) {
+      setItems((list) => list.filter((item) => item.id !== project.id));
+    } else {
+      setLeaving((ids) => ({ ...ids, [project.id]: true }));
+      deleteTimers.current.push(
+        window.setTimeout(() => {
+          setItems((list) => list.filter((item) => item.id !== project.id));
+          setLeaving((ids) => {
+            const next = { ...ids };
+            delete next[project.id];
+            return next;
+          });
+        }, DELETE_MS)
+      );
+    }
+
+    const body = new FormData();
+    body.set("id", project.id);
+    const result = await deleteProject(body);
+    if (!result?.ok) {
+      removed.current.delete(project.id);
+      setLeaving((ids) => {
+        const next = { ...ids };
+        delete next[project.id];
+        return next;
+      });
+      setItems(projects.filter((item) => !removed.current.has(item.id)));
+      return;
+    }
+    router.refresh();
+  }
 
   useEffect(() => {
     const next = savedView(window.localStorage.getItem(VIEW_KEY));
@@ -232,8 +295,8 @@ export function ProjectsBoard({ projects }) {
 
   const normalized = query.trim().toLowerCase();
   const visible = useMemo(
-    () => projects.filter((project) => matchesQuery(project, normalized)),
-    [projects, normalized]
+    () => items.filter((project) => matchesQuery(project, normalized)),
+    [items, normalized]
   );
   const Card = CARD[shown] || HairlineCard;
 
@@ -262,7 +325,7 @@ export function ProjectsBoard({ projects }) {
         </form>
       </div>
 
-      {projects.length ? (
+      {items.length ? (
         <div className="projects-toolbar">
           <label className="projects-search">
             <span className="visually-hidden">Search projects</span>
@@ -287,7 +350,7 @@ export function ProjectsBoard({ projects }) {
         </div>
       ) : null}
 
-      {!projects.length ? (
+      {!items.length ? (
         <p className="empty-projects">No saved listings yet.</p>
       ) : !visible.length ? (
         <p className="empty-projects">No projects match that search.</p>
@@ -298,7 +361,12 @@ export function ProjectsBoard({ projects }) {
             data-dir={String(motion.dir)}
           >
             {visible.map((project) => (
-              <Card key={project.id} project={project} />
+              <div
+                key={project.id}
+                className={`project-card-slot${leaving[project.id] ? " is-leaving" : ""}`}
+              >
+                <Card project={project} onDelete={removeProject} />
+              </div>
             ))}
           </div>
         </div>

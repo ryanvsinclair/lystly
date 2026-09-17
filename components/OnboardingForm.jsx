@@ -4,8 +4,10 @@ import { useState } from "react";
 import { completeOnboarding, lookupAgencyAction } from "@/app/onboarding/actions";
 import { LIQUID_MESH_COLORS, LiquidMesh } from "@/components/LiquidMesh";
 import { SiteLogo } from "@/components/SiteLogo";
+import { useMeshPageMotion } from "@/lib/use-mesh-page-motion.js";
 
 export function OnboardingForm() {
+  const { pageClass } = useMeshPageMotion("/onboarding");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const [homepage, setHomepage] = useState("");
@@ -25,6 +27,7 @@ export function OnboardingForm() {
       return;
     }
     setLookup(result);
+    if (result.homepage) setHomepage(result.homepage);
   }
 
   async function onSubmit(event) {
@@ -45,88 +48,91 @@ export function OnboardingForm() {
   const isNewAgency = lookup && !lookup.exists;
 
   return (
-    <div className="auth-page is-onboarding">
+    <div className={`${pageClass} is-onboarding`}>
       <div className="auth-mesh">
         <LiquidMesh colors={[...LIQUID_MESH_COLORS]} playWhenVisible={false} />
+        <div className="auth-mesh-veil" aria-hidden />
       </div>
-      <form className="auth-card" onSubmit={onSubmit}>
-        <SiteLogo tone="white" />
-        <h1>Set up your studio</h1>
-        <p>Paste your agency homepage, then add the logo and your cutout.</p>
-        {error ? <p className="auth-error">{error}</p> : null}
+      <div className="auth-stage">
+        <form className={`auth-card${isNewAgency ? " is-new-agency" : ""}`} onSubmit={onSubmit}>
+        <div className="onboard-head">
+          <SiteLogo tone="white" />
+          <h1>Set up your studio</h1>
+          <p>Paste your agency homepage, then add the logo and your cutout.</p>
+          {error ? <p className="auth-error">{error}</p> : null}
+        </div>
 
-        <label>
-          Agency homepage
-          <input
-            name="homepage"
-            type="url"
-            inputMode="url"
-            placeholder="https://youragency.com"
-            value={homepage}
-            onChange={(event) => {
-              setHomepage(event.target.value);
-              setLookup(null);
-            }}
-            onBlur={onHomepageBlur}
-            required
-          />
-        </label>
+        <div className="onboard-fields">
+          <label className="onboard-span">
+            Agency homepage
+            <input
+              name="homepage"
+              type="url"
+              inputMode="url"
+              placeholder="https://youragency.com"
+              value={homepage}
+              onChange={(event) => {
+                setHomepage(event.target.value);
+                setLookup(null);
+              }}
+              onBlur={onHomepageBlur}
+              required
+            />
+          </label>
 
-        {lookup?.exists ? (
-          <p className="auth-note">
-            You&apos;ll use {lookup.agency.name}&apos;s existing logo.
-          </p>
-        ) : null}
+          {lookup?.exists ? (
+            <p className="auth-note onboard-span">
+              You&apos;ll use {lookup.agency.name}&apos;s existing logo.
+            </p>
+          ) : null}
 
-        {isNewAgency ? (
-          <>
-            <label>
-              Agency name
-              <input
-                name="agency_name"
-                type="text"
-                defaultValue={lookup.name || ""}
-                required
-              />
-            </label>
-            <label>
-              Agency logo
-              <input name="logo" type="file" accept="image/png,image/webp,image/jpeg" required />
-              <span className="auth-tip">
-                Pro tip: the logo should have a transparent background.
-              </span>
-            </label>
-          </>
-        ) : null}
+          {isNewAgency ? (
+            <>
+              <label>
+                Agency name
+                <input
+                  name="agency_name"
+                  type="text"
+                  defaultValue={lookup.name || ""}
+                  required
+                />
+              </label>
+              <label>
+                Agency logo
+                <input name="logo" type="file" accept="image/png,image/webp,image/jpeg" required />
+                <span className="auth-tip">Transparent background works best.</span>
+              </label>
+            </>
+          ) : null}
 
-        <label>
-          Agent name
-          <input name="display_name" type="text" required />
-        </label>
-        <label>
-          Phone
-          <input name="phone" type="tel" />
-        </label>
-        <label>
-          Email on the square
-          <input name="public_email" type="email" />
-        </label>
-        <label>
-          Instagram
-          <input name="instagram" type="text" placeholder="handle" />
-        </label>
-        <label>
-          Agent cutout
-          <input name="cutout" type="file" accept="image/png,image/webp" required />
-          <span className="auth-tip">
-            Pro tip: use a PNG with a transparent background.
-          </span>
-        </label>
+          <label>
+            Agent name
+            <input name="display_name" type="text" required />
+          </label>
+          <label>
+            Phone
+            <input name="phone" type="tel" />
+          </label>
+          <label>
+            Email on the square
+            <input name="public_email" type="email" />
+          </label>
+          <label>
+            Instagram
+            <input name="instagram" type="text" placeholder="handle" />
+          </label>
+          <label className="onboard-span">
+            Agent cutout
+            <input name="cutout" type="file" accept="image/png,image/webp" required />
+            <span className="auth-tip">Use a PNG with a transparent background.</span>
+          </label>
+        </div>
 
         <button className="btn-primary" type="submit" disabled={pending || !lookup}>
           {pending ? "Saving…" : "Continue"}
         </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

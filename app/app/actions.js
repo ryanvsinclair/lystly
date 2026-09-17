@@ -75,12 +75,18 @@ export async function createProject() {
 }
 
 export async function deleteProject(formData) {
-  const { supabase } = await requireUser();
-  const id = String(formData.get("id") || "");
-  if (!id) return;
-  const { error } = await supabase.from("projects").delete().eq("id", id);
-  if (error) {
-    throw new Error(error.message || "Could not delete project.");
+  try {
+    const { supabase } = await requireSignedIn();
+    const id = String(formData.get("id") || "");
+    if (!id) return { ok: false, error: "Could not delete project." };
+    const { error } = await supabase.from("projects").delete().eq("id", id);
+    if (error) {
+      return { ok: false, error: error.message || "Could not delete project." };
+    }
+    revalidatePath("/app");
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message || "Could not delete project." };
   }
 }
 
@@ -88,7 +94,9 @@ export async function saveProject(id, payload = {}) {
   try {
     const { supabase } = await requireSignedIn();
     if (!id) return { ok: false, error: "Could not save project." };
-    if (payloadChars(payload) > MAX_SAVE_CHARS) {
+    const listing = payload.listing || {};
+    const studio = payload.studio || {};
+    if (payloadChars({ listing, studio }) > MAX_SAVE_CHARS) {
       return { ok: false, error: "This listing is too large to save. Remove a photo and try again." };
     }
 
@@ -97,8 +105,8 @@ export async function saveProject(id, payload = {}) {
       .update({
         title: payload.title || "Untitled listing",
         listing_url: payload.listing_url || null,
-        listing: payload.listing || {},
-        studio: payload.studio || {},
+        listing,
+        studio,
       })
       .eq("id", id);
 

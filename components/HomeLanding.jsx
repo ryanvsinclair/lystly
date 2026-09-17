@@ -303,7 +303,7 @@ export function HomeLanding({ signedIn = false, brand = null }) {
             )}
           </div>
 
-          <HomePreview listing={listing} brand={brand} />
+          <HomePreview listing={listing} brand={brand} onNeedAuth={leaveTo} />
         </section>
       </div>
       </div>
