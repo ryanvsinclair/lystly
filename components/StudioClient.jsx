@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AppBarSlot } from "@/components/AppBar";
 import { StudioMarkup } from "@/components/StudioMarkup";
-import { saveAgentPose, saveProject } from "@/app/app/actions";
+import { saveAgentPose, saveProject, saveProjectPhoto } from "@/app/app/actions";
 import { MAX_AGENT_POSES } from "@/lib/brand.js";
 import "@/src/styles.css";
 
@@ -11,23 +11,43 @@ const AUTOSAVE_MS = 30000;
 
 export function StudioClient({ project, brand }) {
   const [saveLabel, setSaveLabel] = useState("Saved");
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
   const apiRef = useRef(null);
   const dirtyRef = useRef(false);
+  const savingRef = useRef(false);
   const projectRef = useRef(project);
   const persistRef = useRef(async () => {});
   projectRef.current = project;
 
-  persistRef.current = async function persist() {
+  persistRef.current = async function persist({ force = false, source = "auto" } = {}) {
     const api = apiRef.current;
-    if (!api || !dirtyRef.current) return;
+    if (!api || savingRef.current) return;
+    if (!force && !dirtyRef.current) return;
+    savingRef.current = true;
     dirtyRef.current = false;
+    setSaving(true);
     setSaveLabel("Saving…");
     try {
-      await saveProject(projectRef.current.id, api.getStudioState());
-      setSaveLabel("Saved");
+      const state = await api.getPersistableStudioState();
+      await saveProject(projectRef.current.id, state);
+      if (dirtyRef.current) {
+        setDirty(true);
+        setSaveLabel("Unsaved");
+      } else {
+        setDirty(false);
+        setSaveLabel(source === "manual" ? "Saved" : "Autosaved");
+      }
     } catch (err) {
       dirtyRef.current = true;
-      setSaveLabel(err.message || "Save failed");
+      setDirty(true);
+      const message = String(err?.message || "");
+      setSaveLabel(
+        /unexpected response/i.test(message) ? "Could not save. Try again." : message || "Save failed"
+      );
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
     }
   };
 
@@ -40,7 +60,13 @@ export function StudioClient({ project, brand }) {
       studio.bootStudio({
         onChange() {
           dirtyRef.current = true;
+          setDirty(true);
           setSaveLabel("Unsaved");
+        },
+        async onUploadPhoto(file) {
+          const body = new FormData();
+          body.set("file", file);
+          return saveProjectPhoto(projectRef.current.id, body);
         },
         async onUploadPose(slot, file) {
           const body = new FormData();
@@ -90,7 +116,17 @@ export function StudioClient({ project, brand }) {
   return (
     <div className="studio-page">
       <AppBarSlot>
-        <span className="save-dot">{saveLabel}</span>
+        <div className="save-cluster" title="Autosaves every 30 seconds">
+          <span className="save-dot">{saveLabel}</span>
+          <button
+            type="button"
+            className="ghost save-btn"
+            disabled={saving || !dirty}
+            onClick={() => persistRef.current({ force: true, source: "manual" })}
+          >
+            Save
+          </button>
+        </div>
       </AppBarSlot>
       <div className="studio-shell">
         <StudioMarkup

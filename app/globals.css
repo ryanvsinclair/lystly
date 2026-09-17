@@ -1210,9 +1210,20 @@ body:has(.auth-page) {
   background: var(--app-lid);
 }
 
+.save-cluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .save-dot {
   font-size: 12px;
   color: var(--app-page-muted);
+}
+
+.save-cluster .save-btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 .dashboard {

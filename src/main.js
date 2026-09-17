@@ -47,6 +47,7 @@ let agentScaleInput;
 let agentPosX = POSE_START_X;
 let agentPosY = 0;
 let studioHooks = {};
+let photoUploadReady = true;
 
 const HEADLINES = {
   "coming-soon": { kicker: "COMING", status: "SOON" },
@@ -1061,6 +1062,10 @@ function isImageFile(file) {
   return /\.(png|jpe?g|gif|webp|heic|heif|avif|bmp)$/i.test(file.name || "");
 }
 
+function isEmbeddedPhoto(url) {
+  return typeof url === "string" && url.startsWith("data:image") && url.length > 256;
+}
+
 async function persistGalleryPhoto(file) {
   const dataUrl = await fileToDataUrl(file);
   try {
@@ -1068,6 +1073,62 @@ async function persistGalleryPhoto(file) {
   } catch {
     return dataUrl;
   }
+}
+
+async function dataUrlToFile(dataUrl, name = "photo.jpg") {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  const type = blob.type || "image/jpeg";
+  const ext = type === "image/png" ? "png" : type === "image/webp" ? "webp" : "jpg";
+  const base = String(name || "photo").replace(/\.[^.]+$/, "") || "photo";
+  return new File([blob], `${base}.${ext}`, { type });
+}
+
+async function uploadLocalPhoto(dataUrl, name = "photo.jpg") {
+  if (!isEmbeddedPhoto(dataUrl)) return dataUrl;
+  if (dataUrl.length > 400000) {
+    try {
+      dataUrl = await compressPhotoDataUrl(dataUrl);
+    } catch {
+      // Keep the original if compression fails.
+    }
+  }
+  const upload = studioHooks.onUploadPhoto;
+  if (!upload || !photoUploadReady) return dataUrl;
+  try {
+    const result = await upload(await dataUrlToFile(dataUrl, name));
+    const url = result?.url || "";
+    if (!url) throw new Error("Could not save that photo.");
+    return url;
+  } catch (err) {
+    const message = String(err?.message || "");
+    if (/not ready|bucket not found/i.test(message)) {
+      photoUploadReady = false;
+      return dataUrl;
+    }
+    throw err;
+  }
+}
+
+async function persistLocalPhoto(file) {
+  return uploadLocalPhoto(await persistGalleryPhoto(file), file?.name || "photo.jpg");
+}
+
+async function replaceEmbeddedPhotos(value) {
+  if (typeof value === "string") {
+    return isEmbeddedPhoto(value) ? uploadLocalPhoto(value) : value;
+  }
+  if (Array.isArray(value)) {
+    return Promise.all(value.map(replaceEmbeddedPhotos));
+  }
+  if (value && typeof value === "object") {
+    const next = {};
+    for (const [key, child] of Object.entries(value)) {
+      next[key] = await replaceEmbeddedPhotos(child);
+    }
+    return next;
+  }
+  return value;
 }
 
 async function attachGalleryPhotos(files) {
@@ -1078,7 +1139,7 @@ async function attachGalleryPhotos(files) {
     const next = listingGalleryPhotos();
     let added = 0;
     for (const file of images) {
-      const url = await persistGalleryPhoto(file);
+      const url = await persistLocalPhoto(file);
       if (!url || next.includes(url)) continue;
       next.push(url);
       added += 1;
@@ -1161,16 +1222,28 @@ async function urlToDataUrl(url) {
 }
 
 async function applyPropertyFile(file, label = "Pasted photo") {
-  if (!file || !String(file.type || "").startsWith("image/")) return false;
-  const dataUrl = await fileToDataUrl(file);
-  if (propertyObjectUrl) {
-    URL.revokeObjectURL(propertyObjectUrl);
-    propertyObjectUrl = "";
+  if (!file || !isImageFile(file)) return false;
+  try {
+    const url = await persistLocalPhoto(file);
+    if (propertyObjectUrl) {
+      URL.revokeObjectURL(propertyObjectUrl);
+      propertyObjectUrl = "";
+    }
+    listingPhotoSource = url;
+    setPhoto(url);
+    const name = document.getElementById("propertyFileName");
+    if (name) name.textContent = label || file.name || "Pasted photo";
+    const photos = listingGalleryPhotos();
+    if (url && !photos.includes(url)) {
+      setListingPhotos([url, ...photos]);
+      refreshGalleries();
+    }
+    studioHooks.onChange?.();
+    return true;
+  } catch (err) {
+    setPfStatus(err.message || "Could not add that photo.", true);
+    return false;
   }
-  setPhoto(dataUrl);
-  document.getElementById("propertyFileName").textContent =
-    label || file.name || "Pasted photo";
-  return true;
 }
 
 function imageFilesFromDataTransfer(data) {
@@ -1196,15 +1269,15 @@ function isTypingTarget(el) {
   return Boolean(el.isContentEditable);
 }
 
-function useClipboardImage(event) {
+async function useClipboardImage(event) {
   const files = imageFilesFromDataTransfer(event.clipboardData);
   if (!files.length) return false;
   event.preventDefault();
   if (previewMode === "brochure" && !pointerOverPreview) {
-    attachGalleryPhotos(files);
+    await attachGalleryPhotos(files);
     return true;
   }
-  applyPropertyFile(
+  await applyPropertyFile(
     files[0],
     files[0].name && files[0].name !== "image.png" ? files[0].name : "Pasted photo"
   );
@@ -2218,6 +2291,30 @@ export function getStudioState() {
   };
 }
 
+export async function getPersistableStudioState() {
+  const state = getStudioState();
+  const listing = await replaceEmbeddedPhotos(state.listing || {});
+  const studio = await replaceEmbeddedPhotos(state.studio || {});
+  const copies = new Set(
+    [listing.photo, ...(Array.isArray(listing.photos) ? listing.photos : [])].filter(Boolean)
+  );
+  if (isEmbeddedPhoto(studio.propertyUrl) && copies.has(studio.propertyUrl)) {
+    studio.propertyUrl = "";
+  }
+  if (isEmbeddedPhoto(studio.listingPhotoSource) && copies.has(studio.listingPhotoSource)) {
+    studio.listingPhotoSource = "";
+  }
+  lastListing = listing;
+  if (studio.listingPhotoSource) listingPhotoSource = studio.listingPhotoSource;
+  if (studio.propertyUrl && (isEmbeddedPhoto(propertyUrl) || String(propertyUrl).startsWith("blob:"))) {
+    setPhoto(studio.propertyUrl);
+  } else if (studio.propertyUrl) {
+    propertyUrl = studio.propertyUrl;
+  }
+  if (Array.isArray(studio.brochurePhotoOrder)) brochurePhotoOrder = studio.brochurePhotoOrder;
+  return { ...state, listing, studio };
+}
+
 export function applyStudioState(data = {}) {
   const studio = data.studio || {};
   const listingUrl = data.listing_url || "";
@@ -2312,6 +2409,7 @@ export function applyBrand(brand = {}) {
 
 export function bootStudio(hooks = {}) {
   studioHooks = hooks;
+  photoUploadReady = true;
   resetStudioBindings();
   bindDom();
   mountIcons();
