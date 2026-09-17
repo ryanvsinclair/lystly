@@ -39,6 +39,7 @@ let brochureEmpty;
 let previewSwitch;
 let posePicker;
 let statusPicker;
+let templatePicker;
 let comingSoonDateInput;
 let comingSoonGroup;
 let availableOnLabel;
@@ -84,8 +85,11 @@ let featuresOverride = "";
 let previewMode = "listing";
 let pointerOverPreview = false;
 let activeHeadline = "just-leased";
+let activeTemplate = "dock";
 let brochurePhotoOrder = [];
 let listingPhotoSource = "";
+
+const TEMPLATES = ["dock", "editorial", "twin", "side"];
 
 const TEXT_FONTS = [
   { id: "montserrat", family: "var(--font-montserrat), Montserrat, sans-serif" },
@@ -136,6 +140,7 @@ function bindDom() {
   previewSwitch = document.getElementById("previewSwitch");
   posePicker = document.getElementById("posePicker");
   statusPicker = document.getElementById("statusPicker");
+  templatePicker = document.getElementById("templatePicker");
   comingSoonDateInput = document.getElementById("comingSoonDate");
   comingSoonGroup = document.getElementById("comingSoonGroup");
   availableOnLabel = document.getElementById("availableOnLabel");
@@ -818,8 +823,11 @@ async function pastePropertyFinderLink() {
 
 function setPhoto(url) {
   propertyUrl = url && url !== PLACEHOLDER ? url : "";
-  bgImage.src = propertyUrl || PLACEHOLDER;
-  bgBlur.src = propertyUrl || PLACEHOLDER;
+  const src = propertyUrl || PLACEHOLDER;
+  bgImage.src = src;
+  document.querySelectorAll("#bgBlur, #bgBlurTop").forEach((img) => {
+    img.src = src;
+  });
   listing.classList.toggle("has-photo", Boolean(propertyUrl));
 }
 
@@ -1329,7 +1337,26 @@ function applyPhotoPosition(value) {
   photoPos = String(value ?? "50");
   const pos = `center ${photoPos}%`;
   bgImage.style.objectPosition = pos;
-  bgBlur.style.objectPosition = pos;
+  document.querySelectorAll("#bgBlur, #bgBlurTop").forEach((img) => {
+    img.style.objectPosition = pos;
+  });
+}
+
+function setTemplate(id) {
+  const key = TEMPLATES.includes(id) ? id : "dock";
+  activeTemplate = key;
+  if (!listing) return;
+  TEMPLATES.forEach((name) => {
+    listing.classList.toggle(`is-tpl-${name}`, name === key);
+  });
+  listing.dataset.template = key;
+  templatePicker?.querySelectorAll("[data-template]").forEach((btn) => {
+    const on = btn.dataset.template === key;
+    btn.classList.toggle("is-active", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  if (templatePicker) syncSlideLids(templatePicker);
+  if (previewMode === "brochure") refreshBrochureListingPage();
 }
 
 function applyAgentLayout() {
@@ -1650,6 +1677,12 @@ listen(statusPicker, "click", (e) => {
   const card = e.target.closest(".status-card");
   if (!card) return;
   setHeadline(card.dataset.status);
+});
+listen(templatePicker, "click", (e) => {
+  const btn = e.target.closest("[data-template]");
+  if (!btn) return;
+  setTemplate(btn.dataset.template);
+  studioHooks.onChange?.();
 });
 listen(comingSoonDateInput, "pointerdown", (e) => {
   e.stopPropagation();
@@ -2164,6 +2197,7 @@ export function getStudioState() {
     listing: lastListing || {},
     studio: {
       headline: activeHeadline,
+      template: activeTemplate,
       comingSoonDate: comingSoonDateInput?.value || "",
       pose: activePose,
       photoPos: photoPos,
@@ -2199,6 +2233,7 @@ export function applyStudioState(data = {}) {
     comingSoonDateInput.value = studio.comingSoonDate;
   }
   if (studio.headline) setHeadline(studio.headline);
+  setTemplate(studio.template || "dock");
   if (studio.pose && studio.pose !== "custom") setPose(studio.pose);
 
   if (studio.photoPos != null) applyPhotoPosition(studio.photoPos);
@@ -2291,6 +2326,7 @@ export function bootStudio(hooks = {}) {
   bindDownloadEvents();
   setPreviewPaneState(previewFrame, true);
   setPreviewPaneState(brochurePreview, false);
+  setTemplate(activeTemplate);
   syncSlideLids();
   renderListingGallery();
   listen(document.querySelector(".app"), "input", () => studioHooks.onChange?.());

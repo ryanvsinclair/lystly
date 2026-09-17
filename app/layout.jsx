@@ -31,6 +31,13 @@ const fraunces = Fraunces({
 export const metadata = {
   title: "Lystly",
   description: "Create listing squares and brochures from a link.",
+  icons: {
+    icon: [
+      { url: "/brand/lystly-l.png", type: "image/png", media: "(prefers-color-scheme: light)" },
+      { url: "/brand/lystly-l-white.png", type: "image/png", media: "(prefers-color-scheme: dark)" },
+    ],
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({ children }) {

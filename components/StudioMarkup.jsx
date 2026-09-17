@@ -29,7 +29,7 @@ export const StudioMarkup = memo(function StudioMarkup({ cutoutUrl = "", poses =
           </button>
           <div className="download-tip" id="studioHelpTip" role="tooltip">
             <strong>How it works</strong>
-            <p>Pick a pose, drop in the property photo, then click any text on the preview to style it.</p>
+            <p>Pick a glass layout, drop in the property photo, then click any text on the preview to style it.</p>
           </div>
         </header>
 
@@ -67,6 +67,30 @@ export const StudioMarkup = memo(function StudioMarkup({ cutoutUrl = "", poses =
               </button>
               <button type="button" className="status-card" data-status="just-sold" aria-pressed="false">
                 Just sold
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section className="group">
+          <h2>Glass pack</h2>
+          <div className="template-picker" id="templatePicker" role="listbox" aria-label="Glass pack">
+            <div className="slide-well" data-index="0">
+              <b className="slide-lid" aria-hidden="true"></b>
+              <button type="button" className="status-card is-active" data-template="dock" aria-pressed="true">
+                Dock
+              </button>
+              <button type="button" className="status-card" data-template="editorial" aria-pressed="false">
+                Editorial
+              </button>
+            </div>
+            <div className="slide-well" data-index="-1">
+              <b className="slide-lid" aria-hidden="true" hidden></b>
+              <button type="button" className="status-card" data-template="twin" aria-pressed="false">
+                Twin bars
+              </button>
+              <button type="button" className="status-card" data-template="side" aria-pressed="false">
+                Side pane
               </button>
             </div>
           </div>
@@ -222,7 +246,7 @@ export const StudioMarkup = memo(function StudioMarkup({ cutoutUrl = "", poses =
             role="img"
             aria-label="Listing preview. Paste or drop a property photo."
           >
-            <article className={`listing${cutoutUrl ? " has-agent pose-custom" : ""}`} id="listing">
+            <article className={`listing is-tpl-dock${cutoutUrl ? " has-agent pose-custom" : ""}`} id="listing" data-template="dock">
               <div className="listing-bg">
                 <img id="bgImage" alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
                 <div className="bg-fallback" id="bgFallback">
@@ -234,6 +258,17 @@ export const StudioMarkup = memo(function StudioMarkup({ cutoutUrl = "", poses =
                 <img className="brand-logo" id="brandLogo" alt="" hidden />
                 <span className="brand-name" id="brandName"></span>
                 <span className="brand-sub" id="brandSub"></span>
+              </div>
+
+              <div className="card card-top" id="glassTop">
+                <div className="card-face">
+                  <div className="card-blur-clip">
+                    <img id="bgBlurTop" alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" />
+                  </div>
+                  <div className="card-frost"></div>
+                </div>
+                <div className="card-glare"></div>
+                <div className="card-rim" aria-hidden="true"></div>
               </div>
 
               <div className="card" id="glassCard">

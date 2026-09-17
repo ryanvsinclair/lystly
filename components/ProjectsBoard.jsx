@@ -154,12 +154,14 @@ function RowCard({ project }) {
         </div>
         <p className="project-card-cell is-price">{project.price || "—"}</p>
         <p className="project-card-cell is-rooms">{project.rooms || "—"}</p>
-        <time dateTime={project.updated_at}>{formatUpdated(project.updated_at)}</time>
-        <i className="project-card-arrow" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m9 5 7 7-7 7" />
-          </svg>
-        </i>
+        <div className="project-card-end">
+          <time dateTime={project.updated_at}>{formatUpdated(project.updated_at)}</time>
+          <i className="project-card-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m9 5 7 7-7 7" />
+            </svg>
+          </i>
+        </div>
       </a>
       <ConfirmDelete confirm={confirm} onConfirm={() => setConfirm(true)} project={project} />
     </article>

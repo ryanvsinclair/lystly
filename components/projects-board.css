@@ -129,6 +129,15 @@
   .projects-page .project-grid.is-in {
     animation: none;
   }
+
+  .projects-page .project-card-end,
+  .projects-page .project-card.is-row .project-card-remove {
+    transition: none;
+  }
+
+  .projects-page .project-card.is-row:hover .project-card-end {
+    transform: none;
+  }
 }
 
 .projects-page .project-grid.is-hairline {
@@ -379,7 +388,7 @@
 
 .projects-page .project-card.is-row .project-card-open {
   display: grid;
-  grid-template-columns: 56px minmax(0, 2.2fr) minmax(128px, 0.8fr) minmax(110px, 0.7fr) 148px 20px;
+  grid-template-columns: 56px minmax(0, 2.2fr) minmax(128px, 0.8fr) minmax(110px, 0.7fr) auto;
   align-items: center;
   column-gap: 22px;
   width: 100%;
@@ -424,8 +433,16 @@
   letter-spacing: 0;
 }
 
-.projects-page .project-card.is-row time {
+.projects-page .project-card-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
   justify-self: end;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.projects-page .project-card.is-row time {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -445,9 +462,36 @@
 
 .projects-page .project-card.is-row .project-card-delete {
   top: 50%;
-  right: auto;
-  left: 10px;
+  right: 12px;
+  left: auto;
   transform: translateY(-50%);
+}
+
+.projects-page .project-card.is-row .project-card-remove {
+  opacity: 0;
+  transform: translateX(8px);
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.22s ease;
+}
+
+.projects-page .project-card.is-row:hover .project-card-end {
+  transform: translateX(-38px);
+}
+
+.projects-page .project-card.is-row:hover .project-card-remove,
+.projects-page .project-card.is-row .project-card-remove:focus-visible,
+.projects-page .project-card.is-row .project-card-remove.is-confirm {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.projects-page .project-card.is-row .project-card-remove:hover,
+.projects-page .project-card.is-row .project-card-remove:focus-visible {
+  transform: scale(1.06);
 }
 
 @media (max-width: 860px) {
@@ -469,7 +513,7 @@
   }
 
   .projects-page .project-card.is-row .project-card-open {
-    grid-template-columns: 56px minmax(0, 1fr) 20px;
+    grid-template-columns: 56px minmax(0, 1fr) auto;
     column-gap: 14px;
   }
 

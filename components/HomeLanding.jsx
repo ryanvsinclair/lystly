@@ -257,8 +257,7 @@ export function HomeLanding({ signedIn = false, brand = null }) {
               the square or brochure, drop in your cutout
               {signedIn
                 ? ", then open Projects to save and download."
-                : ", then log in to download."}{" "}
-              Canada support coming soon.
+                : ", then log in to download."}
             </p>
 
             <form
