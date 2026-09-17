@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { signOut } from "@/app/app/actions";
 import { HomePreview } from "@/components/HomePreview";
+import { SiteLogo } from "@/components/SiteLogo";
 import { LIQUID_MESH_COLORS, LiquidMesh } from "@/components/LiquidMesh";
 import {
   comingSoonMessage,
@@ -10,6 +13,14 @@ import {
   parseListingUrl,
   portalFromHostname,
 } from "@/lib/listing-sites.js";
+import {
+  afterPaint,
+  cleanAppPath,
+  clearEnterFlags,
+  isLeaveHomePath,
+  markLeaveHome,
+  takeHomeEnter,
+} from "@/lib/app-nav.js";
 
 const OOPS_LINK = "Oops that wasnt a link! Try again!";
 import "@/src/styles.css";
@@ -42,13 +53,103 @@ const SAMPLE = {
   ],
 };
 
-export function HomeLanding() {
+const MESH_IN_MS = 700;
+const UI_IN_MS = 480;
+const UI_OUT_MS = 420;
+const MESH_OUT_MS = 560;
+
+function prefersReduced() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+export function HomeLanding({ signedIn = false, brand = null }) {
+  const router = useRouter();
   const [url, setUrl] = useState("");
   const [listing, setListing] = useState(SAMPLE);
   const [status, setStatus] = useState("");
   const [error, setError] = useState(false);
   const [filled, setFilled] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [intro, setIntro] = useState("idle");
+  const [outro, setOutro] = useState("idle");
+  const destRef = useRef("");
+  const outroRef = useRef(outro);
+  outroRef.current = outro;
+
+  useLayoutEffect(() => {
+    if (!takeHomeEnter()) return;
+    if (prefersReduced()) {
+      clearEnterFlags();
+      return;
+    }
+    setIntro("mesh");
+  }, []);
+
+  useEffect(() => {
+    if (intro !== "mesh") return undefined;
+    return afterPaint(() => setIntro("mesh-on"));
+  }, [intro]);
+
+  useEffect(() => {
+    if (intro !== "mesh-on") return undefined;
+    const timer = window.setTimeout(() => setIntro("ui-on"), MESH_IN_MS);
+    return () => window.clearTimeout(timer);
+  }, [intro]);
+
+  useEffect(() => {
+    if (intro !== "ui-on") return undefined;
+    const timer = window.setTimeout(() => {
+      setIntro("done");
+      clearEnterFlags();
+    }, UI_IN_MS);
+    return () => window.clearTimeout(timer);
+  }, [intro]);
+
+  function leaveTo(path) {
+    if (outroRef.current !== "idle") return;
+    if (prefersReduced()) {
+      markLeaveHome(path);
+      router.push(path);
+      return;
+    }
+    destRef.current = path;
+    markLeaveHome(path);
+    setOutro("ui-off");
+  }
+
+  useEffect(() => {
+    function onClick(event) {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = event.target.closest?.("a[href]");
+      if (!link) return;
+      if (link.target && link.target !== "_self") return;
+      if (link.hasAttribute("download")) return;
+      const next = new URL(link.href, window.location.href);
+      if (next.origin !== window.location.origin) return;
+      const path = cleanAppPath(next.pathname);
+      if (!isLeaveHomePath(path)) return;
+      event.preventDefault();
+      leaveTo(path);
+    }
+
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [router]);
+
+  useEffect(() => {
+    if (outro !== "ui-off") return undefined;
+    const timer = window.setTimeout(() => setOutro("mesh-off"), UI_OUT_MS);
+    return () => window.clearTimeout(timer);
+  }, [outro]);
+
+  useEffect(() => {
+    if (outro !== "mesh-off") return undefined;
+    const timer = window.setTimeout(() => {
+      router.push(destRef.current);
+    }, MESH_OUT_MS);
+    return () => window.clearTimeout(timer);
+  }, [outro, router]);
 
   function rejectUnsupportedLink(raw) {
     if (isSupportedListingLink(raw)) return false;
@@ -104,25 +205,47 @@ export function HomeLanding() {
     }
   }
 
+  const homeClass = [
+    "home",
+    intro !== "idle" && intro !== "done" ? `is-intro is-${intro}` : "",
+    outro !== "idle" ? `is-outro is-${outro}` : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div className="home">
+    <div className={homeClass}>
       <div className="home-hero">
       <div className="home-mesh">
         <LiquidMesh colors={[...LIQUID_MESH_COLORS]} playWhenVisible={false} />
+        <div className="home-mesh-veil" aria-hidden />
       </div>
 
       <div className="home-ui">
         <nav className="site-nav">
-          <Link className="site-logo" href="/">
-            Lystly
-          </Link>
+          <SiteLogo tone="white" />
           <div className="site-nav-links">
-            <Link className="nav-link" href="/login">
-              Log in
-            </Link>
-            <Link className="nav-cta" href="/signup">
-              Get started
-            </Link>
+            {signedIn ? (
+              <>
+                <Link className="nav-link" href="/app">
+                  Projects
+                </Link>
+                <form action={signOut}>
+                  <button className="nav-cta" type="submit">
+                    Log out
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <Link className="nav-link" href="/login">
+                  Log in
+                </Link>
+                <Link className="nav-cta" href="/signup">
+                  Get started
+                </Link>
+              </>
+            )}
           </div>
         </nav>
 
@@ -131,8 +254,11 @@ export function HomeLanding() {
             <h1>Listing posts in seconds, not an hour of design.</h1>
             <p>
               Paste a listing from a major real estate portal in the UAE. Preview
-              the square or brochure, drop in your cutout, then log in to
-              download. Canada support coming soon.
+              the square or brochure, drop in your cutout
+              {signedIn
+                ? ", then open Projects to save and download."
+                : ", then log in to download."}{" "}
+              Canada support coming soon.
             </p>
 
             <form
@@ -166,20 +292,19 @@ export function HomeLanding() {
               <p className="home-paste-status">Try a live listing link. The preview updates here.</p>
             )}
 
-            <div className="hero-actions">
-              <Link
-                className="btn-primary"
-                href={filled ? "/signup" : "/signup"}
-              >
-                {filled ? "Save this listing" : "Get started"}
-              </Link>
-              <Link className="btn-secondary" href="/login">
-                Log in
-              </Link>
-            </div>
+            {signedIn ? null : (
+              <div className="hero-actions">
+                <Link className="btn-primary" href="/signup">
+                  {filled ? "Save this listing" : "Get started"}
+                </Link>
+                <Link className="btn-secondary" href="/login">
+                  Log in
+                </Link>
+              </div>
+            )}
           </div>
 
-          <HomePreview listing={listing} />
+          <HomePreview listing={listing} brand={brand} />
         </section>
       </div>
       </div>

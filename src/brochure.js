@@ -10,6 +10,9 @@ const MAX_GALLERY = 16;
 function loadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    if (src && !src.startsWith("data:") && !src.startsWith("blob:")) {
+      img.crossOrigin = "anonymous";
+    }
     img.onload = () => resolve(img);
     img.onerror = () => reject(new Error("Could not load a listing photo."));
     img.src = src;
@@ -41,18 +44,21 @@ export function photoSrc(url) {
 async function preparePhoto(url) {
   const src = photoSrc(url);
   if (!src) return null;
-  const response = await fetch(src);
-  if (!response.ok) throw new Error("Could not load a listing photo.");
-  const blob = await response.blob();
-  if (!String(blob.type || "").startsWith("image/")) {
-    throw new Error("Could not load a listing photo.");
+  if (src.startsWith("data:") || src.startsWith("blob:")) {
+    return compressPhoto(await loadImage(src));
   }
-  const objectUrl = URL.createObjectURL(blob);
   try {
-    const img = await loadImage(objectUrl);
-    return compressPhoto(img);
-  } finally {
-    URL.revokeObjectURL(objectUrl);
+    const response = await fetch(src);
+    if (!response.ok) throw new Error("Could not load a listing photo.");
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    try {
+      return compressPhoto(await loadImage(objectUrl));
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+    }
+  } catch {
+    return compressPhoto(await loadImage(src));
   }
 }
 
@@ -91,16 +97,17 @@ let imageAlias = 0;
 
 function addCanvasImage(doc, canvas, x, y, w, h, type = "JPEG") {
   imageAlias += 1;
-  doc.addImage(
-    canvas.toDataURL(type === "PNG" ? "image/png" : "image/jpeg", 0.88),
-    type,
-    x,
-    y,
-    w,
-    h,
-    `img-${imageAlias}`,
-    "FAST"
-  );
+  try {
+    const data = canvas.toDataURL(type === "PNG" ? "image/png" : "image/jpeg", 0.88);
+    doc.addImage(data, type, x, y, w, h, `img-${imageAlias}`, "FAST");
+  } catch (err) {
+    if (type !== "JPEG") {
+      const jpeg = canvas.toDataURL("image/jpeg", 0.88);
+      doc.addImage(jpeg, "JPEG", x, y, w, h, `img-${imageAlias}-jpg`, "FAST");
+      return;
+    }
+    throw new Error(err?.message || "Could not add a page to the brochure.");
+  }
 }
 
 function drawPagePhoto(doc, photo, fadeBottom = false) {
@@ -359,14 +366,79 @@ function addPhotoPage(doc, photo, label, page, total, agencyName) {
   setText(doc, [255, 255, 255]);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
-  doc.text(agencyName || "Your agency", 28, PAGE_H - 22);
+  doc.text(agencyName || "", 28, PAGE_H - 22);
   doc.text(label, PAGE_W / 2, PAGE_H - 22, { align: "center" });
   doc.text(`${page} / ${total}`, PAGE_W - 28, PAGE_H - 22, { align: "right" });
 }
 
-function addListingPage(doc, dataUrl) {
+async function addListingPage(doc, dataUrl) {
+  const img = await loadImage(dataUrl);
+  const canvas = document.createElement("canvas");
+  const px = 2;
+  canvas.width = Math.max(1, Math.round(PAGE_W * px));
+  canvas.height = Math.max(1, Math.round(PAGE_H * px));
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#081d56";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   doc.addPage([PAGE_W, PAGE_H], "landscape");
-  doc.addImage(dataUrl, "PNG", 0, 0, PAGE_W, PAGE_H);
+  addCanvasImage(doc, canvas, 0, 0, PAGE_W, PAGE_H);
+}
+
+function addFallbackListingPage(doc, data, photo) {
+  doc.addPage([PAGE_W, PAGE_H], "landscape");
+  drawPagePhoto(doc, photo, true);
+  const x = 36;
+  let y = 72;
+  setText(doc, [255, 255, 255]);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.text(String(data.propertyName || "Listing"), x, y);
+  y += 28;
+  if (data.location) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(String(data.location), x, y);
+    y += 26;
+  }
+  if (data.price) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(36);
+    doc.text(String(data.price), x, y);
+    y += 40;
+  }
+  const facts = [
+    data.bedrooms ? `${data.bedrooms} Beds` : "",
+    data.area ? `${data.area} Sq. Ft.` : "",
+    data.cheques ? `${data.cheques} Cheques` : "",
+    data.term || "",
+  ].filter(Boolean);
+  if (facts.length) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(facts.join("    "), x, y);
+    y += 28;
+  }
+  if (data.agentName || data.phone || data.email) {
+    doc.setFontSize(11);
+    doc.text(
+      [data.agentName, data.phone, data.email].filter(Boolean).join("  ·  "),
+      x,
+      PAGE_H - 28
+    );
+  }
+}
+
+function savePdf(doc, filename) {
+  const blob = doc.output("blob");
+  const href = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = href;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(href), 2000);
 }
 
 export function brochurePagePlan(data) {
@@ -406,6 +478,7 @@ export function brochurePagePlan(data) {
 }
 
 export async function buildBrochurePdf(data, onProgress, listingImage) {
+  imageAlias = 0;
   const urls = [...new Set((data.photos || []).filter(Boolean))].slice(
     0,
     MAX_GALLERY
@@ -453,12 +526,17 @@ export async function buildBrochurePdf(data, onProgress, listingImage) {
     );
   });
 
-  if (!listingImage) {
-    throw new Error("Could not capture the listing image.");
-  }
   onProgress?.("Adding listing page…");
-  addListingPage(doc, listingImage);
+  if (listingImage) {
+    await addListingPage(doc, listingImage);
+  } else {
+    addFallbackListingPage(doc, data, photos[0]);
+  }
 
   onProgress?.("Saving PDF…");
-  doc.save(filenameFrom(data));
+  try {
+    savePdf(doc, filenameFrom(data));
+  } catch (err) {
+    throw new Error(err?.message || "Could not save the brochure.");
+  }
 }

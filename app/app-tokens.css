@@ -1,0 +1,334 @@
+/* App chrome tokens. Scoped so the landing page is unchanged. */
+
+.app-shell {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--app-page);
+  color: var(--app-page-type);
+}
+
+.app-shell-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: #042f2e;
+  pointer-events: none;
+  opacity: 0;
+}
+
+html:has(.app-shell),
+body:has(.app-shell) {
+  background: var(--app-page);
+}
+
+html[data-app-enter],
+html[data-app-enter] body {
+  background: #042f2e;
+}
+
+html[data-app-enter] .app-shell-veil,
+.app-shell.is-arrive-hold .app-shell-veil {
+  opacity: 1;
+}
+
+html[data-app-enter] .app-shell.is-wash .app-shell-veil,
+html[data-app-enter] .app-shell.is-arrive .app-shell-veil,
+.app-shell.is-wash .app-shell-veil,
+.app-shell.is-arrive .app-shell-veil {
+  opacity: 0;
+  transition: opacity 0.52s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.app-shell.is-leave .app-shell-veil {
+  animation: app-veil-in 0.32s ease both;
+}
+
+@keyframes app-veil-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.app-shell.is-leave,
+.app-shell.is-arrive-hold,
+.app-shell.is-wash,
+.app-shell.is-arrive {
+  overflow: hidden;
+}
+
+.app-shell .listly-bar {
+  transition: transform 0.32s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.app-shell .listly-bar.is-leave,
+html[data-app-enter] .app-shell .listly-bar {
+  transform: translateY(-100%);
+}
+
+html[data-app-enter] .app-shell.is-arrive .listly-bar,
+.app-shell.is-arrive .listly-bar {
+  transform: none;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html[data-app-enter] .app-shell-page {
+  opacity: 0;
+}
+
+.app-shell-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.app-shell-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell-page.is-out {
+  animation: app-page-out 0.28s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+.app-shell-page.is-wait {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.app-shell-page.is-in {
+  animation: app-page-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.app-page-loop {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+}
+
+.app-page-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--app-panel-border);
+  border-top-color: var(--app-page-type);
+  border-radius: 50%;
+  animation: app-page-spin 0.7s linear infinite;
+}
+
+@keyframes app-page-out {
+  to {
+    opacity: 0;
+    transform: translateX(-36px);
+  }
+}
+
+@keyframes app-page-in {
+  from {
+    opacity: 0;
+    transform: translateX(36px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes app-page-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .listly-bar-title.is-out,
+  .listly-bar-title.is-in,
+  .app-shell-page.is-out,
+  .app-shell-page.is-in,
+  .app-page-spinner {
+    animation: none;
+  }
+
+  html[data-app-enter] .app-shell .listly-bar,
+  html[data-app-enter] .app-shell-page,
+  html[data-app-enter] .app-shell-veil,
+  .app-shell-veil {
+    transform: none;
+    opacity: 0;
+    transition: none;
+    animation: none;
+  }
+}
+
+.app-shell .listly-bar {
+  background: var(--app-bar);
+  color: var(--app-bar-type);
+  border-bottom: 0;
+}
+
+.app-shell .listly-bar a,
+.app-shell .listly-bar button {
+  color: var(--app-bar-type);
+}
+
+.app-shell .slide-well {
+  background: var(--app-well);
+}
+
+.app-shell .slide-lid {
+  background: var(--app-lid);
+}
+
+.app-shell .slide-well > :not(.slide-lid) {
+  background: transparent;
+  color: var(--app-well-type);
+}
+
+.app-shell .slide-well > .is-active,
+.app-shell .slide-well > button.is-active {
+  background: transparent;
+  color: var(--app-lid-type);
+}
+
+.app-shell .listly-bar .theme-mode {
+  background: var(--app-well);
+}
+
+.app-shell .listly-bar .theme-mode button {
+  color: var(--app-well-type);
+}
+
+.app-shell .listly-bar .theme-mode button.is-active {
+  background: transparent;
+  color: var(--app-lid-type);
+}
+
+.app-shell .listly-bar .ghost:hover {
+  background: color-mix(in srgb, var(--app-bar-type) 10%, transparent);
+}
+
+.app-shell .listly-bar-title-well {
+  border-left-color: color-mix(in srgb, var(--app-bar-type) 22%, transparent);
+}
+
+.app-shell .save-dot {
+  color: color-mix(in srgb, var(--app-bar-type) 72%, transparent);
+}
+
+.app-shell .dashboard-head h1,
+.app-shell .dashboard-head p,
+.app-shell .empty-projects {
+  color: var(--app-page-type);
+}
+
+.app-shell .dashboard-head p,
+.app-shell .empty-projects {
+  color: var(--app-page-muted);
+}
+
+.app-shell .btn-primary {
+  background: var(--app-accent);
+  color: var(--app-accent-type);
+}
+
+.app-shell .btn-secondary {
+  color: var(--app-page-type);
+  box-shadow: inset 0 0 0 1.5px var(--app-panel-border);
+}
+
+.app-shell .btn-danger {
+  color: var(--app-danger);
+  box-shadow: inset 0 0 0 1.5px var(--app-danger);
+}
+
+.app-shell .settings-status {
+  color: var(--app-page-muted);
+}
+
+.app-shell .settings-status.is-error,
+.app-shell .pf-status.is-error,
+.app-shell .download-status.is-error {
+  color: var(--app-danger);
+}
+
+.app-shell .settings-themes {
+  background: var(--app-well);
+}
+
+.app-shell .settings-theme {
+  border: 0;
+  background: transparent;
+  color: var(--app-well-type);
+}
+
+.app-shell .settings-theme.is-active {
+  color: var(--app-lid-type);
+}
+
+.app-shell .settings-theme small {
+  color: color-mix(in srgb, currentColor 68%, transparent);
+}
+
+.app-shell .studio-page .panel {
+  background: var(--app-panel);
+  color: var(--app-panel-type);
+  border-right-color: var(--app-panel-border);
+}
+
+.app-shell .studio-page .coming-soon-date,
+.app-shell .studio-page .panel input[type="date"] {
+  color: var(--app-control-type);
+  background: var(--app-control);
+  border-color: var(--app-panel-border);
+}
+
+.app-shell .studio-page .download-info {
+  border-color: var(--app-panel-border);
+}
+
+.app-shell .studio-page .download-tip p {
+  color: color-mix(in srgb, var(--app-page) 78%, transparent);
+}
+
+.app-shell .studio-page .listing-gallery-add {
+  color: var(--app-page-muted);
+}
+
+.app-shell .studio-page .listing-gallery-item {
+  border-color: var(--app-panel-border);
+}
+
+.app-shell .studio-page .brochure-empty,
+.app-shell .studio-page .listing-gallery-label {
+  color: var(--app-page-muted);
+}
+
+.app-shell .projects-view {
+  background: var(--app-well);
+}
+
+.app-shell .projects-view button,
+.app-shell .projects-view button:hover {
+  color: var(--app-well-type);
+}
+
+.app-shell .projects-view button.is-active {
+  color: var(--app-lid-type);
+}

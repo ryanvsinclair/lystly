@@ -29,7 +29,7 @@ begin
   insert into public.profiles (id, display_name)
   values (
     new.id,
-    pg_catalog.coalesce(new.raw_user_meta_data ->> 'display_name', pg_catalog.split_part(new.email, '@', 1))
+    coalesce(new.raw_user_meta_data ->> 'display_name', pg_catalog.split_part(new.email, '@', 1))
   );
   return new;
 end;

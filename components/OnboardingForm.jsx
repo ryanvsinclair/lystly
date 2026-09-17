@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { completeOnboarding, lookupAgencyAction } from "@/app/onboarding/actions";
 import { LIQUID_MESH_COLORS, LiquidMesh } from "@/components/LiquidMesh";
+import { SiteLogo } from "@/components/SiteLogo";
 
 export function OnboardingForm() {
   const [error, setError] = useState("");
@@ -45,14 +45,12 @@ export function OnboardingForm() {
   const isNewAgency = lookup && !lookup.exists;
 
   return (
-    <div className="auth-page">
+    <div className="auth-page is-onboarding">
       <div className="auth-mesh">
         <LiquidMesh colors={[...LIQUID_MESH_COLORS]} playWhenVisible={false} />
       </div>
       <form className="auth-card" onSubmit={onSubmit}>
-        <Link className="site-logo" href="/">
-          Lystly
-        </Link>
+        <SiteLogo tone="white" />
         <h1>Set up your studio</h1>
         <p>Paste your agency homepage, then add the logo and your cutout.</p>
         {error ? <p className="auth-error">{error}</p> : null}

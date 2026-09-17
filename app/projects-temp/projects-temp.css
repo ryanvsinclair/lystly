@@ -1,0 +1,499 @@
+.pcards-temp {
+  min-height: 100vh;
+  background: #ece7dc;
+  color: #10182c;
+  padding: 28px 28px 80px;
+}
+
+.pcards-temp-head {
+  max-width: 1180px;
+  margin: 0 auto 24px;
+}
+
+.pcards-temp-head a {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3d4a6b;
+}
+
+.pcards-temp-head h1 {
+  margin: 0;
+  font-size: 36px;
+  letter-spacing: -0.04em;
+  color: #042f2e;
+}
+
+.pcards-temp-head p {
+  margin: 8px 0 0;
+  max-width: 620px;
+  color: #3d4a6b;
+}
+
+.pcards-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.pcards-picks button {
+  appearance: none;
+  border: 0;
+  background: #f4f0e8;
+  color: #042f2e;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pcards-picks button.is-on {
+  background: #042f2e;
+  color: #f4f0e8;
+}
+
+.pcards-hero,
+.pcards-stack {
+  max-width: 1180px;
+  margin: 0 auto 28px;
+}
+
+.pcards-copy {
+  margin: 12px 0 0;
+}
+
+.pcards-copy h2 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: -0.03em;
+}
+
+.pcards-copy p {
+  margin: 4px 0 0;
+  color: #3d4a6b;
+  font-size: 14px;
+}
+
+.pcards-frame {
+  overflow: hidden;
+  border-radius: 22px;
+  background: #3d9a7a;
+  box-shadow: 0 16px 40px rgba(4, 47, 46, 0.16);
+}
+
+.pcards-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 18px;
+  background: #f4f0e8;
+  color: #042f2e;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.pcards-bar span {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.pcards-dash {
+  padding: 28px 28px 32px;
+}
+
+.pcards-dash-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.pcards-dash-head h3 {
+  margin: 0;
+  color: #f4f0e8;
+  font-size: 32px;
+  letter-spacing: -0.04em;
+}
+
+.pcards-dash-head p {
+  margin: 6px 0 0;
+  color: rgba(244, 240, 232, 0.78);
+}
+
+.pcards-new {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: #eab308;
+  color: #042f2e;
+  font: inherit;
+  font-weight: 600;
+}
+
+.pcards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.pcards-grid.is-rows {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.pcards-grid.is-compact {
+  gap: 12px;
+}
+
+.pcards-grid.is-banner {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pcard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 148px;
+  padding: 18px;
+  border: 0;
+  border-radius: 18px;
+  background: #fff;
+  color: inherit;
+  text-align: left;
+  box-shadow: 0 10px 30px rgba(4, 47, 46, 0.12);
+}
+
+.pcard h4 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+  color: #042f2e;
+}
+
+.pcard time {
+  color: #667089;
+  font-size: 13px;
+}
+
+.pcard-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pcard-open,
+.pcard-del {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pcard-open {
+  background: #eab308;
+  color: #042f2e;
+}
+
+.pcard-del {
+  background: transparent;
+  color: #8a2430;
+  box-shadow: inset 0 0 0 1.5px rgba(138, 36, 48, 0.25);
+}
+
+.pcard-cover {
+  display: block;
+  width: calc(100% + 36px);
+  margin: -18px -18px 14px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 18px 18px 0 0;
+  background: #ece7dc;
+}
+
+.pcard-cover.is-empty {
+  display: grid;
+  place-items: center;
+  color: #667089;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pcard-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: rgba(244, 240, 232, 0.92);
+  color: #8a2430;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.pcard.is-cover,
+.pcard.is-open,
+.pcard.is-cream,
+.pcard.is-compact,
+.pcard.is-photo-poster,
+.pcard.is-photo-banner,
+.pcard.is-photo-square,
+.pcard.is-photo-deep,
+.pcard.is-photo-overlay {
+  min-height: 0;
+}
+
+.pcard.is-photo-overlay {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+}
+
+.pcard.is-photo-overlay .pcard-cover {
+  width: 100%;
+  margin: 0;
+  aspect-ratio: 4 / 5;
+  border-radius: 18px;
+}
+
+.pcard.is-photo-overlay .pcard-overlay {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 48px 16px 16px;
+  background: linear-gradient(180deg, transparent, rgba(4, 47, 46, 0.78));
+}
+
+.pcard.is-photo-overlay h4,
+.pcard.is-photo-overlay time {
+  color: #f4f0e8;
+}
+
+.pcard.is-photo-overlay time {
+  opacity: 0.78;
+}
+
+.pcard.is-photo-poster .pcard-cover {
+  aspect-ratio: 4 / 5;
+}
+
+.pcard.is-photo-banner .pcard-cover {
+  aspect-ratio: 16 / 10;
+}
+
+.pcard.is-photo-square .pcard-cover {
+  aspect-ratio: 1;
+}
+
+.pcard.is-photo-square,
+.pcard.is-photo-deep {
+  padding: 0;
+  overflow: hidden;
+}
+
+.pcard.is-photo-square .pcard-cover,
+.pcard.is-photo-deep .pcard-cover {
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
+}
+
+.pcard.is-photo-square .pcard-caption {
+  padding: 14px 16px 16px;
+  background: #f4f0e8;
+}
+
+.pcard.is-photo-deep .pcard-caption {
+  padding: 14px 16px 16px;
+  background: #042f2e;
+}
+
+.pcard.is-photo-deep h4,
+.pcard.is-photo-deep time {
+  color: #f4f0e8;
+}
+
+.pcard.is-photo-deep time {
+  opacity: 0.68;
+}
+
+.pcard.is-photo-deep .pcard-actions {
+  margin-top: 12px;
+}
+
+.pcard.is-photo-deep .pcard-del {
+  color: #f4f0e8;
+  box-shadow: inset 0 0 0 1.5px rgba(244, 240, 232, 0.28);
+}
+
+.pcard.is-photo-row {
+  min-height: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 12px 10px 10px;
+}
+
+.pcard.is-photo-row .pcard-cover {
+  width: 128px;
+  margin: 0;
+  flex: 0 0 128px;
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
+}
+
+.pcard.is-photo-row .pcard-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pcard.is-photo-row .pcard-actions {
+  margin: 0;
+}
+
+.pcard.is-open {
+  position: relative;
+  padding-bottom: 16px;
+  cursor: pointer;
+}
+
+.pcard.is-editorial {
+  min-height: 168px;
+}
+
+.pcard.is-editorial time {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #3d9a7a;
+}
+
+.pcard.is-editorial h4 {
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.pcard.is-editorial .pcard-open {
+  width: 100%;
+}
+
+.pcard.is-rows {
+  min-height: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 12px 10px 10px;
+}
+
+.pcard.is-rows .pcard-cover {
+  width: 72px;
+  margin: 0;
+  flex: 0 0 72px;
+  border-radius: 12px;
+}
+
+.pcard.is-rows .pcard-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pcard.is-rows .pcard-actions {
+  margin: 0;
+}
+
+.pcard.is-cream {
+  background: #f4f0e8;
+}
+
+.pcard.is-deep {
+  background: #042f2e;
+}
+
+.pcard.is-deep h4,
+.pcard.is-deep time {
+  color: #f4f0e8;
+}
+
+.pcard.is-deep time {
+  opacity: 0.68;
+}
+
+.pcard.is-deep .pcard-del {
+  color: #f4f0e8;
+  box-shadow: inset 0 0 0 1.5px rgba(244, 240, 232, 0.28);
+}
+
+.pcard.is-compact {
+  padding: 14px;
+  border-radius: 14px;
+}
+
+.pcard.is-compact h4 {
+  font-size: 15px;
+}
+
+.pcard.is-compact .pcard-cover {
+  width: calc(100% + 28px);
+  margin: -14px -14px 10px;
+  aspect-ratio: 4 / 3;
+  border-radius: 14px 14px 0 0;
+}
+
+.pcard.is-compact .pcard-actions {
+  margin-top: 12px;
+}
+
+.pcard.is-compact .pcard-open,
+.pcard.is-compact .pcard-del {
+  padding: 8px 12px;
+}
+
+.pcards-stack .pcards-frame {
+  box-shadow: 0 10px 28px rgba(4, 47, 46, 0.12);
+}
+
+.pcards-stack .pcards-dash-head h3 {
+  font-size: 24px;
+}
+
+.pcards-pick-card {
+  appearance: none;
+  display: block;
+  width: 100%;
+  margin: 0 0 22px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pcards-pick-card.is-on .pcards-frame {
+  box-shadow: 0 0 0 3px #042f2e, 0 16px 40px rgba(4, 47, 46, 0.16);
+}
+
+@media (max-width: 860px) {
+  .pcards-grid:not(.is-rows) {
+    grid-template-columns: 1fr;
+  }
+}

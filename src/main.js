@@ -14,25 +14,18 @@ const ICONS = {
   phone: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`,
   mail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>`,
   ig: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.9" fill="currentColor" stroke="none"/></svg>`,
-  image: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="m3.8 16.2 4.6-4.6a1.5 1.5 0 0 1 2.1 0L15 16"/><path d="m13.2 14.2 1.6-1.6a1.5 1.5 0 0 1 2.1 0l3.6 3.6"/><circle cx="9" cy="9.2" r="1.2"/></svg>`,
-  folder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.2A1.7 1.7 0 0 1 5.2 6.5H10l2 2h6.8A1.7 1.7 0 0 1 20.5 10v8.3a1.7 1.7 0 0 1-1.7 1.7H5.2A1.7 1.7 0 0 1 3.5 18.3z"/></svg>`,
+  image: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.2" cy="9.8" r="1.35"/><path d="m4.2 16.6 4.8-4.8 3.2 3.2 2.6-2.6 4.8 4.4"/></svg>`,
+  page: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M9 10h6M9 14h6"/></svg>`,
+  folder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 8.4A1.8 1.8 0 0 1 5 6.6h4.1l1.7 1.9H19a1.8 1.8 0 0 1 1.8 1.8v7.3A1.8 1.8 0 0 1 19 19.4H5a1.8 1.8 0 0 1-1.8-1.8z"/></svg>`,
+  download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7.5 11 4.5 4.5L16.5 11"/><path d="M5 19h14"/></svg>`,
   check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 5 5 9-10"/></svg>`,
 };
 
-const AGENT_POSES = {
-  crossed: {
-    src: "/agents/arms-crossed.png?v=5",
-    scale: 76,
-    x: -14,
-    height: 720,
-  },
-  presenting: {
-    src: "/agents/presenting.png?v=5",
-    scale: 70,
-    x: -22,
-    height: 640,
-  },
-};
+const MAX_POSES = 4;
+const POSE_BASE_HEIGHT = 700;
+const POSE_START_X = 8;
+// Projects saved before the numbered pose inventory stored these names.
+const LEGACY_POSES = { crossed: 1, presenting: 2 };
 
 let listing;
 let bgImage;
@@ -44,15 +37,14 @@ let brochurePreview;
 let brochurePages;
 let brochureEmpty;
 let previewSwitch;
-let stageHint;
 let posePicker;
 let statusPicker;
 let comingSoonDateInput;
 let comingSoonGroup;
 let availableOnLabel;
 let agentScaleInput;
-let agentXInput;
-let agentYInput;
+let agentPosX = POSE_START_X;
+let agentPosY = 0;
 let studioHooks = {};
 
 const HEADLINES = {
@@ -75,48 +67,61 @@ const PLACEHOLDER =
 let propertyUrl = "";
 let propertyObjectUrl = "";
 let agentUrl = "";
-let activePose = "crossed";
-let poseBaseHeight = AGENT_POSES.crossed.height;
+let activePose = 1;
+let poseUrls = new Array(MAX_POSES).fill("");
 let lastListing = null;
-let brandAgencyName = "Your agency";
+let photoPos = "50";
+let brandAgencyName = "";
+let brandAgentName = "";
+let brandPhone = "";
+let brandEmail = "";
+let brandInstagram = "";
+let brandCutoutUrl = "";
+const PROFILE_FIELDS = ["agentName", "phone", "email", "instagram"];
 let colorTarget = null;
 let coverPlaceOverride = "";
 let featuresOverride = "";
 let previewMode = "listing";
+let pointerOverPreview = false;
 let activeHeadline = "just-leased";
 let brochurePhotoOrder = [];
 let listingPhotoSource = "";
 
-const COLOR_LABELS = {
-  justWord: "Kicker",
-  statusWord: "Status",
-  comingDate: "Available from",
-  propertyName: "Property name",
-  location: "Location",
-  note: "Note",
-  stat0Value: "Bedrooms",
-  stat0Label: "Bedrooms label",
-  stat1Value: "Area",
-  stat1Label: "Area label",
-  stat2Value: "Price",
-  stat2Label: "Price label",
-  stat3Value: "Cheques",
-  stat3Label: "Cheques label",
-  stat4Value: "Term",
-  stat4Label: "Term label",
-  agentName: "Agent name",
-  phone: "Phone",
-  email: "Email",
-  instagram: "Instagram",
-  note: "Hook",
-  coverPlace: "Cover location",
-  features: "Property features",
-  priceLabel: "Price label",
-};
+const TEXT_FONTS = [
+  { id: "montserrat", family: "var(--font-montserrat), Montserrat, sans-serif" },
+  { id: "outfit", family: "var(--font-outfit), Outfit, sans-serif" },
+  { id: "playfair", family: "var(--font-playfair), 'Playfair Display', serif" },
+  { id: "fraunces", family: "var(--font-fraunces), Fraunces, serif" },
+];
 
 let textColorInput;
-let colorTargetLabel;
 let colorSwatches;
+let studioPanel;
+let panelEditor;
+let textEditorValue;
+let textSizeInput;
+let textSizeValue;
+let textFonts;
+let studioAbort = new AbortController();
+const studioObservers = [];
+
+function listen(el, type, handler, options) {
+  if (!el) return;
+  el.addEventListener(type, handler, { ...options, signal: studioAbort.signal });
+}
+
+function resetStudioBindings() {
+  studioAbort.abort();
+  studioAbort = new AbortController();
+  while (studioObservers.length) studioObservers.pop().disconnect();
+}
+
+function observeSize(el, handler) {
+  if (!el) return;
+  const observer = new ResizeObserver(handler);
+  observer.observe(el);
+  studioObservers.push(observer);
+}
 
 function bindDom() {
   listing = document.getElementById("listing");
@@ -129,18 +134,20 @@ function bindDom() {
   brochurePages = document.getElementById("brochurePages");
   brochureEmpty = document.getElementById("brochureEmpty");
   previewSwitch = document.getElementById("previewSwitch");
-  stageHint = document.getElementById("stageHint");
   posePicker = document.getElementById("posePicker");
   statusPicker = document.getElementById("statusPicker");
   comingSoonDateInput = document.getElementById("comingSoonDate");
   comingSoonGroup = document.getElementById("comingSoonGroup");
   availableOnLabel = document.getElementById("availableOnLabel");
   agentScaleInput = document.getElementById("agentScale");
-  agentXInput = document.getElementById("agentX");
-  agentYInput = document.getElementById("agentY");
   textColorInput = document.getElementById("textColor");
-  colorTargetLabel = document.getElementById("colorTargetLabel");
   colorSwatches = document.getElementById("colorSwatches");
+  studioPanel = document.getElementById("studioPanel");
+  panelEditor = document.getElementById("panelEditor");
+  textEditorValue = document.getElementById("textEditorValue");
+  textSizeInput = document.getElementById("textSize");
+  textSizeValue = document.getElementById("textSizeValue");
+  textFonts = document.getElementById("textFonts");
 }
 
 function hasRealSrc(img) {
@@ -154,10 +161,28 @@ function mountIcons() {
   });
 }
 
+// The frame is a grid item in #previewWrap. Its own track is the only definite
+// box we can trust, so size the square from the track instead of viewport math.
+function previewTrack() {
+  if (!previewWrap) return null;
+  const cs = getComputedStyle(previewWrap);
+  const width = parseFloat(cs.gridTemplateColumns);
+  const height = parseFloat(cs.gridTemplateRows);
+  if (!width || !height) return null;
+  return { width, height };
+}
+
 function scalePreview() {
-  if (previewMode !== "listing") return;
-  const size = Math.min(previewFrame.clientWidth, previewFrame.clientHeight || previewFrame.clientWidth);
-  listing.style.transform = `scale(${size / 1080})`;
+  if (!previewFrame || !listing) return;
+  const track = previewTrack();
+  if (track) {
+    const size = Math.max(160, Math.min(track.width, track.height, 1080));
+    previewFrame.style.width = `${size}px`;
+    previewFrame.style.height = `${size}px`;
+  }
+  const used = previewFrame.clientWidth || 480;
+  listing.style.transform = `scale(${used / 1080})`;
+  listing.style.transformOrigin = "top left";
 }
 
 function scaleBrochurePages() {
@@ -226,7 +251,12 @@ function listingClone() {
   clone.querySelectorAll(".is-color-target").forEach((el) => {
     el.classList.remove("is-color-target");
   });
+  clone.querySelectorAll(".agent-cutout").forEach((img) => {
+    delete img.dataset.dragBound;
+  });
+  // The brochure page centres the clone with its own scale and origin.
   clone.style.removeProperty("transform");
+  clone.style.removeProperty("transform-origin");
   return clone;
 }
 
@@ -300,28 +330,32 @@ function refreshBrochureListingPage() {
     return;
   }
   hold.replaceChildren(listingClone());
+  bindBrochureAgentDrag();
   if (colorTarget && !document.contains(colorTarget)) {
     const field = fieldKey(colorTarget);
     const next = field && hold.querySelector(`[data-field="${field}"]`);
-    if (next) selectColorTarget(next);
+    if (next) openTextEditor(next);
     else colorTarget = null;
   }
 }
 
 function renderBrochurePreview() {
   const { photos, pages } = brochurePagePlan(brochureData(lastListing || {}));
-  const top = previewWrap.scrollTop;
+  const top = brochurePreview?.scrollTop || 0;
   brochurePages.replaceChildren();
   if (!photos.length) {
     brochurePreview.classList.add("is-empty");
     brochureEmpty.textContent = "Paste a listing link to preview the brochure.";
+    renderBrochureGallery();
     return;
   }
   brochurePreview.classList.remove("is-empty");
   brochurePages.append(...pages.map(renderBrochurePage));
   bindBrochureDrag();
+  bindBrochureAgentDrag();
+  renderBrochureGallery();
   scaleBrochurePages();
-  previewWrap.scrollTop = top;
+  brochurePreview.scrollTop = top;
 }
 
 function orderBrochurePhotos(urls) {
@@ -346,6 +380,7 @@ function reorderBrochurePhoto(fromUrl, toUrl, after) {
   photos.splice(after ? to + 1 : to, 0, moved);
   brochurePhotoOrder = photos;
   renderBrochurePreview();
+  studioHooks.onChange?.();
 }
 
 function bindBrochureDrag() {
@@ -389,23 +424,34 @@ function bindBrochureDrag() {
   });
 }
 
-function setPreviewMode(mode) {
+function setPreviewPaneState(el, active) {
+  if (!el) return;
+  el.hidden = false;
+  el.setAttribute("aria-hidden", String(!active));
+  el.inert = !active;
+}
+
+function setPreviewMode(mode, options = {}) {
   previewMode = mode === "brochure" ? "brochure" : "listing";
   const isBrochure = previewMode === "brochure";
+  if (options.instant) previewWrap.classList.add("is-instant");
   previewWrap.classList.toggle("is-brochure", isBrochure);
-  previewFrame.hidden = isBrochure;
-  brochurePreview.hidden = !isBrochure;
-  stageHint.textContent = isBrochure
-    ? "Click text to edit · drag pages to reorder"
-    : "Click text to edit · paste a photo onto the preview";
-  previewSwitch.querySelectorAll("[data-preview]").forEach((btn) => {
+  setPreviewPaneState(previewFrame, !isBrochure);
+  setPreviewPaneState(brochurePreview, isBrochure);
+  previewSwitch?.querySelectorAll("[data-preview]").forEach((btn) => {
     const active = btn.dataset.preview === previewMode;
     btn.classList.toggle("is-active", active);
     btn.setAttribute("aria-selected", String(active));
   });
+  if (previewSwitch) syncSlideLids(previewSwitch);
   renderListingGallery();
   if (isBrochure) renderBrochurePreview();
-  else scalePreview();
+  else renderBrochureGallery();
+  requestAnimationFrame(() => {
+    if (isBrochure) scaleBrochurePages();
+    else scalePreview();
+    if (options.instant) previewWrap.classList.remove("is-instant");
+  });
 }
 
 function fieldValue(id) {
@@ -417,6 +463,13 @@ function setField(id, value) {
   const el = document.getElementById(id);
   if (!el) return;
   el.textContent = String(value);
+}
+
+function applyBrandContacts() {
+  if (brandAgentName) setField("agentName", brandAgentName);
+  if (brandPhone) setField("phone", brandPhone);
+  if (brandEmail) setField("email", brandEmail);
+  if (brandInstagram) setField("instagram", brandInstagram);
 }
 
 function rgbToHex(value) {
@@ -434,7 +487,7 @@ function currentTextColor(el) {
 }
 
 function markActiveSwatch(hex) {
-  colorSwatches.querySelectorAll(".color-swatch").forEach((swatch) => {
+  colorSwatches?.querySelectorAll(".color-swatch").forEach((swatch) => {
     swatch.classList.toggle("is-active", swatch.dataset.color === hex);
   });
 }
@@ -449,23 +502,102 @@ function selectColorTarget(el) {
   const hex = currentTextColor(el);
   textColorInput.disabled = false;
   textColorInput.value = hex;
-  const key = fieldKey(el);
-  colorTargetLabel.textContent = COLOR_LABELS[key] || el.dataset.colorLabel || "Selected text";
   markActiveSwatch(hex);
+}
+
+function fieldTargets(field, fallback) {
+  if (!field) return fallback ? [fallback] : [];
+  return [...document.querySelectorAll(`[id="${field}"], [data-field="${field}"]`)];
 }
 
 function applyTextColor(hex) {
   if (!colorTarget || !hex) return;
   const field = fieldKey(colorTarget);
-  const targets = field
-    ? document.querySelectorAll(`[id="${field}"], [data-field="${field}"]`)
-    : [colorTarget];
+  const targets = fieldTargets(field, colorTarget);
   targets.forEach((node) => {
     node.style.color = hex;
   });
-  if (!field) colorTarget.style.color = hex;
   textColorInput.value = hex;
   markActiveSwatch(hex);
+}
+
+function currentFontId(el) {
+  const family = getComputedStyle(el).fontFamily.toLowerCase();
+  if (family.includes("playfair")) return "playfair";
+  if (family.includes("fraunces")) return "fraunces";
+  if (family.includes("outfit")) return "outfit";
+  return "montserrat";
+}
+
+function syncSlideLids(root = document) {
+  const wells = [...root.querySelectorAll(".slide-well")];
+  if (root.classList?.contains("slide-well")) wells.unshift(root);
+  wells.forEach((well) => {
+    const options = [...well.children].filter((el) => el.matches("button") && !el.hidden);
+    const index = options.findIndex((el) => el.classList.contains("is-active"));
+    well.dataset.index = String(index);
+    const lid = well.querySelector(":scope > .slide-lid");
+    if (lid) lid.hidden = index < 0;
+  });
+}
+
+function markActiveFont(id) {
+  textFonts?.querySelectorAll("button").forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.font === id);
+  });
+  if (textFonts) syncSlideLids(textFonts);
+}
+
+function applyTextSize(px) {
+  if (!colorTarget || !px) return;
+  const size = `${Math.round(Number(px))}px`;
+  fieldTargets(fieldKey(colorTarget), colorTarget).forEach((node) => {
+    node.style.fontSize = size;
+  });
+  if (textSizeInput) textSizeInput.value = String(Math.round(Number(px)));
+  if (textSizeValue) textSizeValue.textContent = String(Math.round(Number(px)));
+}
+
+function applyTextFont(id) {
+  if (!colorTarget || !id) return;
+  const font = TEXT_FONTS.find((item) => item.id === id);
+  if (!font) return;
+  fieldTargets(fieldKey(colorTarget), colorTarget).forEach((node) => {
+    node.style.fontFamily = font.family;
+  });
+  markActiveFont(id);
+}
+
+function syncEditorFromTarget() {
+  if (!colorTarget) return;
+  if (textEditorValue && document.activeElement !== textEditorValue) {
+    textEditorValue.value = colorTarget.textContent || "";
+  }
+  const size = Math.round(parseFloat(getComputedStyle(colorTarget).fontSize) || 24);
+  if (textSizeInput) textSizeInput.value = String(size);
+  if (textSizeValue) textSizeValue.textContent = String(size);
+  markActiveFont(currentFontId(colorTarget));
+}
+
+function openTextEditor(el) {
+  selectColorTarget(el);
+  if (!studioPanel) return;
+  studioPanel.classList.add("is-editing");
+  panelEditor?.setAttribute("aria-hidden", "false");
+  syncEditorFromTarget();
+}
+
+function closeTextEditor() {
+  studioPanel?.classList.remove("is-editing");
+  panelEditor?.setAttribute("aria-hidden", "true");
+  document.querySelectorAll(".is-edit.is-color-target").forEach((node) => {
+    node.classList.remove("is-color-target");
+  });
+  if (document.activeElement?.closest?.(".is-edit")) {
+    document.activeElement.blur();
+  }
+  colorTarget = null;
+  if (textColorInput) textColorInput.disabled = true;
 }
 
 function formatComingDate(iso) {
@@ -516,9 +648,12 @@ function setHeadline(key) {
   setField("statusWord", preset.status);
   listing.classList.toggle("is-available-on", key === "available-on");
   const comingMode = key === "coming-soon" || key === "available-on";
-  comingSoonGroup.classList.toggle("is-split", comingMode);
-  document.querySelector('[data-status="available-on"]').hidden = !comingMode;
-  statusPicker.querySelectorAll(".status-card").forEach((card) => {
+  comingSoonGroup?.classList.toggle("is-split", comingMode);
+  const availableOn = statusPicker?.querySelector('[data-status="available-on"]');
+  const availableNow = statusPicker?.querySelector('[data-status="available-now"]');
+  if (availableOn) availableOn.hidden = !comingMode;
+  if (availableNow) availableNow.hidden = comingMode;
+  statusPicker?.querySelectorAll(".status-card").forEach((card) => {
     const on = card.dataset.status === key;
     card.classList.toggle("is-active", on);
     card.setAttribute("aria-pressed", on ? "true" : "false");
@@ -529,10 +664,19 @@ function setHeadline(key) {
     comingSoonDateInput.focus();
     comingSoonDateInput.showPicker?.();
   }
+  if (statusPicker) syncSlideLids(statusPicker);
 }
 
 function proxiedPhoto(url) {
   return `/api/pf-image?url=${encodeURIComponent(url)}`;
+}
+
+function displayPhoto(url) {
+  if (!url) return "";
+  if (url.startsWith("data:") || url.startsWith("blob:") || url.startsWith("/")) {
+    return url;
+  }
+  return proxiedPhoto(url);
 }
 
 function setPfStatus(message, isError = false) {
@@ -563,12 +707,10 @@ function applyListingToForm(listingData) {
   setField("stat3Value", listingData.cheques);
   setField("stat4Value", listingData.term);
   setField("stat4Label", listingData.termLabel);
-  setField("agentName", listingData.agentName);
-  setField("email", listingData.agentEmail);
-  setField("phone", listingData.agentPhone);
+  applyBrandContacts();
   if (listingData.photo) {
     listingPhotoSource = listingData.photo;
-    setPhoto(proxiedPhoto(listingData.photo));
+    setPhoto(displayPhoto(listingData.photo));
     document.getElementById("propertyFileName").textContent = listingData.sourceLabel
       ? `From ${listingData.sourceLabel}`
       : "From listing";
@@ -605,10 +747,10 @@ function brochureData(listing = {}) {
     term: fieldValue("stat4Value") || listing.term || "",
     termLabel: fieldValue("stat4Label") || listing.termLabel || "Lease Term",
     title: fieldValue("note") || listing.title || "",
-    agentName: fieldValue("agentName") || listing.agentName || "",
-    email: fieldValue("email") || listing.agentEmail || "",
-    phone: fieldValue("phone") || listing.agentPhone || "",
-    instagram: fieldValue("instagram") || "",
+    agentName: fieldValue("agentName") || brandAgentName || "",
+    email: fieldValue("email") || brandEmail || "",
+    phone: fieldValue("phone") || brandPhone || "",
+    instagram: fieldValue("instagram") || brandInstagram || "",
     agencyName: brandAgencyName,
     photos,
     propertyType: listing.propertyType || "",
@@ -633,10 +775,8 @@ function rejectUnsupportedLink(rawUrl) {
 
 async function fillFromPropertyFinder(rawUrl) {
   if (rejectUnsupportedLink(rawUrl)) return;
-  const fetchBtn = document.getElementById("pfFetch");
   const pasteBtn = document.getElementById("pfPaste");
-  fetchBtn.disabled = true;
-  pasteBtn.disabled = true;
+  if (pasteBtn) pasteBtn.disabled = true;
   setPfStatus("Reading listing…");
 
   try {
@@ -655,8 +795,7 @@ async function fillFromPropertyFinder(rawUrl) {
   } catch (err) {
     setPfStatus(err.message || "Could not read that listing.", true);
   } finally {
-    fetchBtn.disabled = false;
-    pasteBtn.disabled = false;
+    if (pasteBtn) pasteBtn.disabled = false;
   }
 }
 
@@ -673,15 +812,15 @@ async function pastePropertyFinderLink() {
   } catch {
     input.focus();
     input.select();
-    setPfStatus("Clipboard blocked. Paste the link, then click fill.", true);
+    setPfStatus("Clipboard blocked. Paste the link into the field.", true);
   }
 }
 
 function setPhoto(url) {
-  propertyUrl = url;
-  bgImage.src = url;
-  bgBlur.src = url;
-  listing.classList.toggle("has-photo", Boolean(url));
+  propertyUrl = url && url !== PLACEHOLDER ? url : "";
+  bgImage.src = propertyUrl || PLACEHOLDER;
+  bgBlur.src = propertyUrl || PLACEHOLDER;
+  listing.classList.toggle("has-photo", Boolean(propertyUrl));
 }
 
 function listingGalleryPhotos() {
@@ -698,15 +837,100 @@ function listingPhotoIsActive(url) {
   );
 }
 
+function syncGalleryLayout() {
+  previewWrap?.classList.add("has-gallery");
+  const listingRail = document.getElementById("listingGallery");
+  const brochureRail = document.getElementById("brochureGallery");
+  setPreviewPaneState(listingRail, previewMode === "listing");
+  setPreviewPaneState(brochureRail, previewMode === "brochure");
+}
+
+function renderBrochureGallery() {
+  const rail = document.getElementById("brochureGallery");
+  const list = document.getElementById("brochureGalleryList");
+  if (!rail || !list) return;
+  const photos = brochurePagePlan(brochureData(lastListing || {})).photos;
+  const show = previewMode === "brochure";
+  if (!show) {
+    syncGalleryLayout();
+    return;
+  }
+
+  list.replaceChildren(
+    ...photos.map((url, index) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "listing-gallery-item is-sortable";
+      btn.draggable = true;
+      btn.dataset.photo = url;
+      btn.setAttribute("aria-label", index === 0 ? "Cover photo" : `Photo ${index + 1}`);
+      const img = document.createElement("img");
+      img.alt = "";
+      img.draggable = false;
+      img.src = photoSrc(url);
+      btn.append(img);
+      if (index === 0) {
+        const badge = document.createElement("span");
+        badge.className = "listing-gallery-badge";
+        badge.textContent = "Cover";
+        btn.append(badge);
+      }
+      let dragged = false;
+      btn.addEventListener("click", () => {
+        if (dragged) {
+          dragged = false;
+          return;
+        }
+        scrollBrochureToPhoto(index);
+      });
+      btn.addEventListener("dragstart", (event) => {
+        dragged = true;
+        event.dataTransfer.setData("text/plain", url);
+        event.dataTransfer.effectAllowed = "move";
+        btn.classList.add("is-dragging");
+      });
+      btn.addEventListener("dragend", () => {
+        btn.classList.remove("is-dragging");
+        list.querySelectorAll(".drop-before, .drop-after").forEach((node) => {
+          node.classList.remove("drop-before", "drop-after");
+        });
+      });
+      btn.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        const box = btn.getBoundingClientRect();
+        const after = event.clientY > box.top + box.height / 2;
+        btn.classList.toggle("drop-after", after);
+        btn.classList.toggle("drop-before", !after);
+      });
+      btn.addEventListener("dragleave", (event) => {
+        if (btn.contains(event.relatedTarget)) return;
+        btn.classList.remove("drop-before", "drop-after");
+      });
+      btn.addEventListener("drop", (event) => {
+        event.preventDefault();
+        const box = btn.getBoundingClientRect();
+        const after = event.clientY > box.top + box.height / 2;
+        btn.classList.remove("drop-before", "drop-after");
+        reorderBrochurePhoto(event.dataTransfer.getData("text/plain"), url, after);
+      });
+      return wrapGalleryThumb(btn, url);
+    })
+  );
+  syncGalleryLayout();
+}
+
+function scrollBrochureToPhoto(index) {
+  const sheets = [...brochurePages.querySelectorAll(".brochure-sheet.is-sortable")];
+  sheets[index]?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
 function renderListingGallery() {
   const rail = document.getElementById("listingGallery");
   const list = document.getElementById("listingGalleryList");
   const photos = listingGalleryPhotos();
-  const show = previewMode === "listing" && photos.length > 0;
-  previewWrap.classList.toggle("has-gallery", show);
-  rail.hidden = !show;
+  const show = previewMode === "listing";
   if (!show) {
-    list.replaceChildren();
+    syncGalleryLayout();
     return;
   }
   list.replaceChildren(
@@ -722,13 +946,16 @@ function renderListingGallery() {
       btn.append(img);
       btn.addEventListener("click", () => {
         listingPhotoSource = url;
-        setPhoto(proxiedPhoto(url));
+        setPhoto(displayPhoto(url));
         document.getElementById("propertyFileName").textContent = `Photo ${index + 1}`;
         renderListingGallery();
+        studioHooks.onChange?.();
       });
-      return btn;
+      return wrapGalleryThumb(btn, url);
     })
   );
+  syncGalleryLayout();
+  scalePreview();
 }
 
 function fileToDataUrl(file) {
@@ -737,6 +964,184 @@ function fileToDataUrl(file) {
     reader.onload = () => resolve(String(reader.result || ""));
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
+  });
+}
+
+function compressPhotoDataUrl(dataUrl, maxEdge = 1600, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxEdge / Math.max(img.naturalWidth, img.naturalHeight));
+      const width = Math.max(1, Math.round(img.naturalWidth * scale));
+      const height = Math.max(1, Math.round(img.naturalHeight * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#cfe0f5";
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = () => reject(new Error("Could not read that photo."));
+    img.src = dataUrl;
+  });
+}
+
+function setListingPhotos(photos) {
+  const next = [...new Set((photos || []).filter(Boolean))];
+  lastListing = { ...(lastListing || {}), photos: next };
+  if (!next.includes(lastListing.photo)) lastListing.photo = next[0] || "";
+  brochurePhotoOrder = orderBrochurePhotos(next);
+}
+
+function refreshGalleries() {
+  renderListingGallery();
+  if (previewMode === "brochure") renderBrochurePreview();
+}
+
+function galleryRemoveControl(url) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "listing-gallery-remove";
+  btn.setAttribute("aria-label", "Remove photo");
+  btn.innerHTML = `
+    <span class="listing-gallery-remove-icon listing-gallery-remove-x" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </span>
+    <span class="listing-gallery-remove-icon listing-gallery-remove-check" aria-hidden="true">${ICONS.check}</span>
+  `;
+  btn.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (btn.classList.contains("is-confirm")) {
+      removeGalleryPhoto(url);
+      return;
+    }
+    btn.classList.add("is-confirm");
+    btn.setAttribute("aria-label", "Confirm remove photo");
+  });
+  return btn;
+}
+
+function wrapGalleryThumb(item, url) {
+  const wrap = document.createElement("div");
+  wrap.className = "listing-gallery-thumb";
+  wrap.append(item, galleryRemoveControl(url));
+  wrap.addEventListener("mouseleave", () => {
+    const remove = wrap.querySelector(".listing-gallery-remove");
+    if (!remove) return;
+    remove.classList.remove("is-confirm");
+    remove.setAttribute("aria-label", "Remove photo");
+  });
+  return wrap;
+}
+
+function setGalleryAddBusy(busy) {
+  document.querySelectorAll(".listing-gallery-add").forEach((el) => {
+    el.classList.toggle("is-busy", busy);
+    const label = [...el.querySelectorAll("span")].find(
+      (node) => !node.classList.contains("listing-gallery-add-plus")
+    );
+    if (label) label.textContent = busy ? "Adding…" : "Add photo";
+  });
+}
+
+function isImageFile(file) {
+  if (!file) return false;
+  if (String(file.type || "").startsWith("image/")) return true;
+  return /\.(png|jpe?g|gif|webp|heic|heif|avif|bmp)$/i.test(file.name || "");
+}
+
+async function persistGalleryPhoto(file) {
+  const dataUrl = await fileToDataUrl(file);
+  try {
+    return await compressPhotoDataUrl(dataUrl);
+  } catch {
+    return dataUrl;
+  }
+}
+
+async function attachGalleryPhotos(files) {
+  const images = [...(files || [])].filter(isImageFile);
+  if (!images.length) return;
+  setGalleryAddBusy(true);
+  try {
+    const next = listingGalleryPhotos();
+    let added = 0;
+    for (const file of images) {
+      const url = await persistGalleryPhoto(file);
+      if (!url || next.includes(url)) continue;
+      next.push(url);
+      added += 1;
+      if (added === 1 && !hasRealSrc(bgImage)) {
+        listingPhotoSource = url;
+        setPhoto(displayPhoto(url));
+        const name = document.getElementById("propertyFileName");
+        if (name) name.textContent = file.name || "Added photo";
+      }
+    }
+    if (!added) return;
+    setListingPhotos(next);
+    refreshGalleries();
+    if (previewMode === "brochure") {
+      const sheets = brochurePages?.querySelectorAll(".brochure-sheet");
+      sheets?.[sheets.length - 1]?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+    studioHooks.onChange?.();
+  } catch (err) {
+    setPfStatus(err.message || "Could not add that photo.", true);
+  } finally {
+    setGalleryAddBusy(false);
+  }
+}
+
+function removeGalleryPhoto(url) {
+  if (!url) return;
+  const wasActive = listingPhotoIsActive(url);
+  setListingPhotos(listingGalleryPhotos().filter((photo) => photo !== url));
+  if (wasActive) {
+    const next = listingGalleryPhotos()[0] || "";
+    listingPhotoSource = next;
+    setPhoto(next ? displayPhoto(next) : PLACEHOLDER);
+    const name = document.getElementById("propertyFileName");
+    if (name) name.textContent = next ? "Listing photo" : "No photo";
+  }
+  refreshGalleries();
+  studioHooks.onChange?.();
+}
+
+function bindGalleryAddInput(add, input) {
+  if (!add || !input) return;
+  const fresh = input.cloneNode(true);
+  fresh.disabled = false;
+  fresh.value = "";
+  input.replaceWith(fresh);
+  fresh.addEventListener("change", async () => {
+    const files = [...(fresh.files || [])];
+    bindGalleryAddInput(add, fresh);
+    await attachGalleryPhotos(files);
+  });
+}
+
+function bindGalleryAdds() {
+  ["listingGallery", "brochureGallery"].forEach((id) => {
+    const rail = document.getElementById(id);
+    const add = rail?.querySelector(".listing-gallery-add");
+    const input = add?.querySelector("input");
+    if (!add || !input || add.dataset.bound) return;
+    add.dataset.bound = "true";
+    bindGalleryAddInput(add, input);
+    add.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      add.classList.add("is-over");
+    });
+    add.addEventListener("dragleave", () => add.classList.remove("is-over"));
+    add.addEventListener("drop", async (event) => {
+      event.preventDefault();
+      add.classList.remove("is-over");
+      await attachGalleryPhotos(imageFilesFromDataTransfer(event.dataTransfer));
+    });
   });
 }
 
@@ -760,17 +1165,20 @@ async function applyPropertyFile(file, label = "Pasted photo") {
   return true;
 }
 
-function imageFileFromDataTransfer(data) {
-  if (!data) return null;
-  const items = [...(data.items || [])];
-  for (const item of items) {
-    if (item.kind === "file" && String(item.type || "").startsWith("image/")) {
-      return item.getAsFile();
-    }
+function imageFilesFromDataTransfer(data) {
+  if (!data) return [];
+  const fromItems = [];
+  for (const item of data.items || []) {
+    if (item.kind !== "file") continue;
+    const file = item.getAsFile();
+    if (isImageFile(file)) fromItems.push(file);
   }
-  return [...(data.files || [])].find((file) =>
-    String(file.type || "").startsWith("image/")
-  ) || null;
+  if (fromItems.length) return fromItems;
+  return [...(data.files || [])].filter(isImageFile);
+}
+
+function imageFileFromDataTransfer(data) {
+  return imageFilesFromDataTransfer(data)[0] || null;
 }
 
 function isTypingTarget(el) {
@@ -781,24 +1189,28 @@ function isTypingTarget(el) {
 }
 
 function useClipboardImage(event) {
-  const file = imageFileFromDataTransfer(event.clipboardData);
-  if (!file) return false;
+  const files = imageFilesFromDataTransfer(event.clipboardData);
+  if (!files.length) return false;
   event.preventDefault();
+  if (previewMode === "brochure" && !pointerOverPreview) {
+    attachGalleryPhotos(files);
+    return true;
+  }
   applyPropertyFile(
-    file,
-    file.name && file.name !== "image.png" ? file.name : "Pasted photo"
+    files[0],
+    files[0].name && files[0].name !== "image.png" ? files[0].name : "Pasted photo"
   );
   previewFrame.classList.remove("is-drop-target");
   return true;
 }
 
-function setAgent(url, pose = "custom") {
+function setAgent(url, pose = activePose) {
+  if (!listing || !agentImage) return;
   agentUrl = url;
-  activePose = pose;
-  poseBaseHeight = AGENT_POSES[pose]?.height || 640;
+  activePose = poseSlot(pose);
   listing.classList.toggle("has-agent", Boolean(url));
-  listing.classList.remove("pose-crossed", "pose-presenting", "pose-custom");
-  if (url) listing.classList.add(`pose-${pose}`);
+  listing.classList.remove("pose-crossed", "pose-presenting");
+  listing.classList.toggle("pose-custom", Boolean(url));
   if (!url) {
     agentImage.src = PLACEHOLDER;
     agentImage.hidden = true;
@@ -808,21 +1220,85 @@ function setAgent(url, pose = "custom") {
   agentImage.src = url;
   agentImage.hidden = false;
   applyAgentLayout();
+  // The image may have been hidden when drag was first bound, so bind on reveal.
+  bindAgentDrag();
 }
 
-function setPose(pose) {
-  const preset = AGENT_POSES[pose];
-  if (!preset) return;
-  agentScaleInput.value = String(preset.scale);
-  agentXInput.value = String(preset.x);
-  if (agentYInput) agentYInput.value = "0";
-  setAgent(preset.src, pose);
-  document.getElementById("agentFileName").textContent = "Optional";
-  posePicker.querySelectorAll(".pose-card").forEach((card) => {
-    const on = card.dataset.pose === pose;
+function poseSlot(value) {
+  const slot = LEGACY_POSES[value] || Number(value);
+  return Number.isInteger(slot) && slot >= 1 && slot <= MAX_POSES ? slot : 1;
+}
+
+function firstFilledPose() {
+  const index = poseUrls.findIndex(Boolean);
+  return index < 0 ? 1 : index + 1;
+}
+
+function paintPoseThumbs() {
+  posePicker?.querySelectorAll(".pose-card").forEach((card) => {
+    const url = poseUrls[poseSlot(card.dataset.pose) - 1] || "";
+    const img = card.querySelector("img");
+    card.classList.toggle("is-filled", Boolean(url));
+    card.classList.toggle("is-empty", !url);
+    const slot = card.dataset.pose;
+    card.setAttribute("aria-label", url ? `Pose ${slot}` : `Add pose ${slot}`);
+    if (!img) return;
+    if (url) {
+      img.src = url;
+      img.hidden = false;
+    } else {
+      img.removeAttribute("src");
+      img.hidden = true;
+    }
+  });
+}
+
+function markActivePose() {
+  posePicker?.querySelectorAll(".pose-card").forEach((card) => {
+    const on = poseSlot(card.dataset.pose) === activePose && Boolean(poseUrls[activePose - 1]);
     card.classList.toggle("is-active", on);
     card.setAttribute("aria-pressed", on ? "true" : "false");
   });
+  if (posePicker) syncSlideLids(posePicker);
+}
+
+function setPose(pose) {
+  const slot = poseSlot(pose);
+  const url = poseUrls[slot - 1] || "";
+  if (!url) return;
+  activePose = slot;
+  brandCutoutUrl = url;
+  setAgent(url, slot);
+  markActivePose();
+  if (previewMode === "brochure") refreshBrochureListingPage();
+}
+
+function setPoseStatus(message, isError = false) {
+  const el = document.getElementById("poseStatus");
+  if (!el) return;
+  el.textContent = message || "";
+  el.hidden = !message;
+  el.classList.toggle("is-error", Boolean(isError));
+}
+
+async function uploadPose(slot, file) {
+  if (!file || !studioHooks.onUploadPose) return;
+  const card = posePicker?.querySelector(`.pose-card[data-pose="${slot}"]`);
+  card?.classList.add("is-busy");
+  setPoseStatus("Adding pose…");
+  try {
+    const url = await studioHooks.onUploadPose(slot, file);
+    if (!url) throw new Error("Could not add that pose.");
+    poseUrls[slot - 1] = url;
+    paintPoseThumbs();
+    setPose(slot);
+    setPoseStatus("");
+    studioHooks.onChange?.();
+  } catch (err) {
+    setPoseStatus(err.message || "Could not add that pose.", true);
+  } finally {
+    card?.classList.remove("is-busy");
+  }
 }
 
 function wireDrop(dropId, inputId, onFile, nameId) {
@@ -836,13 +1312,13 @@ function wireDrop(dropId, inputId, onFile, nameId) {
     name.textContent = file.name;
   };
 
-  input.addEventListener("change", () => handle(input.files[0]));
-  drop.addEventListener("dragover", (e) => {
+  listen(input, "change", () => handle(input.files[0]));
+  listen(drop, "dragover", (e) => {
     e.preventDefault();
     drop.classList.add("over");
   });
-  drop.addEventListener("dragleave", () => drop.classList.remove("over"));
-  drop.addEventListener("drop", (e) => {
+  listen(drop, "dragleave", () => drop.classList.remove("over"));
+  listen(drop, "drop", (e) => {
     e.preventDefault();
     drop.classList.remove("over");
     handle(e.dataTransfer.files[0]);
@@ -850,82 +1326,127 @@ function wireDrop(dropId, inputId, onFile, nameId) {
 }
 
 function applyPhotoPosition(value) {
-  const pos = `center ${value}%`;
+  photoPos = String(value ?? "50");
+  const pos = `center ${photoPos}%`;
   bgImage.style.objectPosition = pos;
   bgBlur.style.objectPosition = pos;
 }
 
 function applyAgentLayout() {
-  const scale = Number(agentScaleInput.value) / 100;
-  const x = Number(agentXInput.value);
-  const y = Number(agentYInput?.value || 0);
-  agentImage.style.left = `${x}px`;
-  agentImage.style.bottom = `${y}px`;
-  agentImage.style.height = `${poseBaseHeight * scale}px`;
+  const scale = Number(agentScaleInput?.value || 76) / 100;
+  const left = `${agentPosX}px`;
+  const bottom = `${agentPosY}px`;
+  const height = `${POSE_BASE_HEIGHT * scale}px`;
+  document.querySelectorAll(".listing .agent-cutout").forEach((img) => {
+    img.style.left = left;
+    img.style.bottom = bottom;
+    img.style.height = height;
+  });
 }
 
-function bindAgentDrag() {
-  if (!agentImage || agentImage.dataset.dragBound) return;
-  agentImage.dataset.dragBound = "true";
-  agentImage.classList.add("is-draggable");
+function bindAgentDragOn(img) {
+  if (!img || img.hidden || img.dataset.dragBound) return;
+  img.dataset.dragBound = "true";
+  img.classList.add("is-draggable");
+  img.draggable = false;
+  img.addEventListener("dragstart", (event) => event.preventDefault());
 
-  agentImage.addEventListener("pointerdown", (event) => {
+  img.addEventListener("pointerdown", (event) => {
     if (event.button != null && event.button !== 0) return;
     event.preventDefault();
     event.stopPropagation();
-    const layoutScale = listingPointerScale(listing);
+    const host = img.closest(".listing") || listing;
+    const layoutScale = listingPointerScale(host);
     const startX = event.clientX;
     const startY = event.clientY;
-    const originX = Number(agentXInput.value);
-    const originY = Number(agentYInput?.value || 0);
-    agentImage.classList.add("is-dragging");
-    agentImage.setPointerCapture(event.pointerId);
+    const originX = agentPosX;
+    const originY = agentPosY;
+    img.classList.add("is-dragging");
+    img.setPointerCapture(event.pointerId);
 
     const onMove = (moveEvent) => {
       const next = clampAgentPosition(
         originX + (moveEvent.clientX - startX) / layoutScale,
         originY + (startY - moveEvent.clientY) / layoutScale,
-        agentImage.offsetWidth,
-        agentImage.offsetHeight
+        img.offsetWidth,
+        img.offsetHeight
       );
-      agentXInput.value = String(Math.round(next.x));
-      if (agentYInput) agentYInput.value = String(Math.round(next.y));
+      agentPosX = Math.round(next.x);
+      agentPosY = Math.round(next.y);
       applyAgentLayout();
     };
 
     const onUp = () => {
-      agentImage.classList.remove("is-dragging");
-      agentImage.removeEventListener("pointermove", onMove);
-      agentImage.removeEventListener("pointerup", onUp);
-      agentImage.removeEventListener("pointercancel", onUp);
+      img.classList.remove("is-dragging");
+      img.removeEventListener("pointermove", onMove);
+      img.removeEventListener("pointerup", onUp);
+      img.removeEventListener("pointercancel", onUp);
       studioHooks.onChange?.();
     };
 
-    agentImage.addEventListener("pointermove", onMove);
-    agentImage.addEventListener("pointerup", onUp);
-    agentImage.addEventListener("pointercancel", onUp);
+    img.addEventListener("pointermove", onMove);
+    img.addEventListener("pointerup", onUp);
+    img.addEventListener("pointercancel", onUp);
   });
 }
 
-async function captureListingPng(pixelRatio = EXPORT_RATIO) {
+function bindAgentDrag() {
+  bindAgentDragOn(agentImage);
+  bindBrochureAgentDrag();
+}
+
+function bindBrochureAgentDrag() {
+  brochurePages?.querySelectorAll(".bp-listing-hold .agent-cutout").forEach(bindAgentDragOn);
+}
+
+const captureImageOptions = {
+  cacheBust: true,
+  includeQueryParams: true,
+  imagePlaceholder: PLACEHOLDER,
+  onImageErrorHandler: () => undefined,
+};
+
+async function toPngSafe(node, options) {
+  const opts = { ...captureImageOptions, ...options };
+  try {
+    return await toPng(node, opts);
+  } catch {
+    return await toPng(node, { ...opts, skipFonts: true });
+  }
+}
+
+async function withInlinedImages(root, run) {
+  const originals = [...root.querySelectorAll("img")].map((img) => [
+    img,
+    img.getAttribute("src"),
+  ]);
+  try {
+    await inlineCloneImages(root);
+    return await run();
+  } finally {
+    originals.forEach(([img, src]) => {
+      if (src != null) img.setAttribute("src", src);
+    });
+  }
+}
+
+async function captureListingPng(pixelRatio = EXPORT_RATIO, extra = {}) {
   const exportOptions = {
     width: LAYOUT_SIZE,
     height: LAYOUT_SIZE,
     pixelRatio,
-    cacheBust: true,
-    includeQueryParams: true,
-    imagePlaceholder: PLACEHOLDER,
+    backgroundColor: extra.backgroundColor,
     style: {
       transform: "none",
       transformOrigin: "top left",
       width: `${LAYOUT_SIZE}px`,
       height: `${LAYOUT_SIZE}px`,
+      ...(extra.background ? { background: extra.background } : {}),
     },
   };
 
-  const wasHidden = previewFrame.hidden;
-  if (wasHidden) {
-    previewFrame.hidden = false;
+  const offscreen = previewMode === "brochure";
+  if (offscreen) {
     previewFrame.style.position = "fixed";
     previewFrame.style.left = "-2000px";
     previewFrame.style.top = "0";
@@ -937,29 +1458,12 @@ async function captureListingPng(pixelRatio = EXPORT_RATIO) {
   listing.classList.add("is-exporting");
 
   try {
-    await Promise.all(
-      [bgImage, bgBlur, agentImage]
-        .filter((img) => (img.getAttribute("src") || "").startsWith("blob:"))
-        .map(async (img) => {
-          img.src = await urlToDataUrl(img.src);
-        })
-    );
     await document.fonts.ready;
-    await Promise.all(
-      [bgImage, bgBlur, agentImage]
-        .filter(hasRealSrc)
-        .map((img) => img.decode?.().catch(() => undefined) ?? Promise.resolve())
-    );
-
-    try {
-      return await toPng(listing, exportOptions);
-    } catch {
-      return await toPng(listing, { ...exportOptions, skipFonts: true });
-    }
+    // Export the agent exactly where it was dragged; the listing clips overflow.
+    return await withInlinedImages(listing, () => toPngSafe(listing, exportOptions));
   } finally {
     listing.classList.remove("is-exporting");
-    if (wasHidden) {
-      previewFrame.hidden = true;
+    if (offscreen) {
       previewFrame.style.position = "";
       previewFrame.style.left = "";
       previewFrame.style.top = "";
@@ -971,9 +1475,8 @@ async function captureListingPng(pixelRatio = EXPORT_RATIO) {
 }
 
 async function downloadPng() {
-  const btn = document.getElementById("downloadBtn");
   const status = document.getElementById("downloadStatus");
-  btn.disabled = true;
+  setDownloadBusy(true);
   status.hidden = false;
   status.classList.remove("is-error");
   status.textContent = "Rendering image…";
@@ -995,8 +1498,8 @@ async function downloadPng() {
     status.classList.add("is-error");
     status.textContent = "Could not export. Try another photo and download again.";
   } finally {
-    setDownloadArmed("");
-    btn.disabled = false;
+    closeDownloadMenu();
+    setDownloadBusy(false);
   }
 }
 
@@ -1014,37 +1517,74 @@ function forceUppercase(el) {
 }
 
 function bindStudioEvents() {
-listing.addEventListener("focusin", (e) => {
+listen(listing, "focusin", (e) => {
   const el = e.target.closest(".is-edit");
-  if (el) selectColorTarget(el);
+  if (el) openTextEditor(el);
 });
-listing.addEventListener("pointerdown", (e) => {
+listen(listing, "pointerdown", (e) => {
   const el = e.target.closest(".is-edit");
-  if (el) selectColorTarget(el);
+  if (el) openTextEditor(el);
 });
-brochurePreview.addEventListener("focusin", (e) => {
+listen(brochurePreview, "focusin", (e) => {
   const el = e.target.closest(".is-edit");
-  if (el) selectColorTarget(el);
+  if (el) openTextEditor(el);
 });
-brochurePreview.addEventListener("pointerdown", (e) => {
+listen(brochurePreview, "pointerdown", (e) => {
   const el = e.target.closest(".is-edit");
-  if (el) selectColorTarget(el);
+  if (el) openTextEditor(el);
 });
-textColorInput.addEventListener("input", (e) => {
+listen(textColorInput, "input", (e) => {
   applyTextColor(e.currentTarget.value);
 });
-colorSwatches.addEventListener("click", (e) => {
+listen(colorSwatches, "click", (e) => {
   const swatch = e.target.closest(".color-swatch");
   if (!swatch || !colorTarget) return;
   applyTextColor(swatch.dataset.color);
 });
-
-listing.addEventListener("input", (e) => {
-  const el = e.target.closest("#justWord, #statusWord");
-  if (!el) return;
-  forceUppercase(el);
+listen(textSizeInput, "input", (e) => {
+  applyTextSize(e.currentTarget.value);
+  studioHooks.onChange?.();
 });
-brochurePreview.addEventListener("input", (e) => {
+listen(textFonts, "click", (e) => {
+  const btn = e.target.closest("[data-font]");
+  if (!btn || !colorTarget) return;
+  applyTextFont(btn.dataset.font);
+  studioHooks.onChange?.();
+});
+listen(textEditorValue, "input", () => {
+  if (!colorTarget) return;
+  const field = fieldKey(colorTarget);
+  const value = textEditorValue.value;
+  if (field === "justWord" || field === "statusWord") {
+    colorTarget.textContent = value.toUpperCase();
+    if (textEditorValue.value !== colorTarget.textContent) {
+      textEditorValue.value = colorTarget.textContent;
+    }
+  } else {
+    colorTarget.textContent = value;
+  }
+  if (field) syncField(field, colorTarget.textContent, colorTarget);
+});
+listen(document, "pointerdown", (e) => {
+  if (!studioPanel?.classList.contains("is-editing")) return;
+  if (e.target.closest(".is-edit") || e.target.closest("#panelEditor")) return;
+  closeTextEditor();
+});
+listen(document, "keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (!studioPanel?.classList.contains("is-editing")) return;
+  closeTextEditor();
+});
+
+listen(listing, "input", (e) => {
+  const el = e.target.closest(".is-edit");
+  if (!el) return;
+  if (el.matches("#justWord, #statusWord")) forceUppercase(el);
+  if (colorTarget && (el === colorTarget || fieldKey(el) === fieldKey(colorTarget))) {
+    syncEditorFromTarget();
+  }
+});
+listen(brochurePreview, "input", (e) => {
   const el = e.target.closest(".is-edit");
   if (!el) return;
   const field = fieldKey(el);
@@ -1054,12 +1594,12 @@ brochurePreview.addEventListener("input", (e) => {
   if (field) syncField(field, el.textContent, el);
 });
 
-listing.addEventListener("keydown", (e) => {
+listen(listing, "keydown", (e) => {
   if (e.key !== "Enter" || !e.target.closest("[contenteditable]")) return;
   e.preventDefault();
   e.target.blur();
 });
-brochurePreview.addEventListener("keydown", (e) => {
+listen(brochurePreview, "keydown", (e) => {
   if (e.key !== "Enter" || !e.target.closest("[contenteditable]")) return;
   if (e.target.closest("[data-field=\"features\"]")) return;
   e.preventDefault();
@@ -1071,48 +1611,64 @@ wireDrop(
   "agentDrop",
   "agentInput",
   (url) => {
-    setAgent(url, "custom");
-    posePicker.querySelectorAll(".pose-card").forEach((card) => {
+    brandCutoutUrl = url;
+    setAgent(url, activePose);
+    posePicker?.querySelectorAll(".pose-card").forEach((card) => {
       card.classList.remove("is-active");
       card.setAttribute("aria-pressed", "false");
     });
+    if (posePicker) syncSlideLids(posePicker);
   },
   "agentFileName"
 );
 
-posePicker.addEventListener("click", (e) => {
+listen(posePicker, "click", (e) => {
   const card = e.target.closest(".pose-card");
   if (!card) return;
-  setPose(card.dataset.pose);
+  const slot = poseSlot(card.dataset.pose);
+  // An empty slot is the "add a pose" button; a filled one just selects it.
+  if (poseUrls[slot - 1]) {
+    setPose(slot);
+    studioHooks.onChange?.();
+    return;
+  }
+  const input = document.getElementById("poseInput");
+  if (!input) return;
+  input.dataset.slot = String(slot);
+  input.value = "";
+  input.click();
 });
-statusPicker.addEventListener("click", (e) => {
+listen(document.getElementById("poseInput"), "change", (e) => {
+  const input = e.currentTarget;
+  const slot = poseSlot(input.dataset.slot);
+  const file = input.files?.[0];
+  input.value = "";
+  uploadPose(slot, file);
+});
+listen(statusPicker, "click", (e) => {
   if (e.target.closest(".coming-soon-date")) return;
   const card = e.target.closest(".status-card");
   if (!card) return;
   setHeadline(card.dataset.status);
 });
-comingSoonDateInput.addEventListener("pointerdown", (e) => {
+listen(comingSoonDateInput, "pointerdown", (e) => {
   e.stopPropagation();
   if (activeHeadline !== "available-on") setHeadline("available-on");
 });
-comingSoonDateInput.addEventListener("change", () => {
+listen(comingSoonDateInput, "change", () => {
   if (activeHeadline !== "available-on") setHeadline("available-on");
   else updateComingDateDisplay();
   if (previewMode === "brochure") refreshBrochureListingPage();
 });
-previewSwitch.addEventListener("click", (e) => {
+listen(previewSwitch, "click", (e) => {
   const btn = e.target.closest("[data-preview]");
-  if (!btn) return;
+  if (!btn || btn.dataset.preview === previewMode) return;
   setPreviewMode(btn.dataset.preview);
 });
 
-document.getElementById("photoPos").addEventListener("input", (e) => {
-  applyPhotoPosition(e.target.value);
-});
-agentScaleInput.addEventListener("input", applyAgentLayout);
-agentXInput.addEventListener("input", applyAgentLayout);
-agentYInput?.addEventListener("input", applyAgentLayout);
+listen(agentScaleInput, "input", applyAgentLayout);
 bindAgentDrag();
+bindGalleryAdds();
 }
 
 function downloadButtons() {
@@ -1120,10 +1676,20 @@ function downloadButtons() {
     document.getElementById("downloadBtn"),
     document.getElementById("brochureBtn"),
     document.getElementById("brochureImagesBtn"),
-  ];
+  ].filter(Boolean);
+}
+
+function stageDownloads() {
+  return document.getElementById("stageDownloads");
+}
+
+function downloadLaunch() {
+  return document.getElementById("downloadLaunch");
 }
 
 function setDownloadBusy(busy) {
+  const launch = downloadLaunch();
+  if (launch) launch.disabled = busy;
   downloadButtons().forEach((btn) => {
     btn.disabled = busy;
   });
@@ -1149,14 +1715,47 @@ const downloadActions = [
 
 let armedDownloadId = "";
 
+function setDownloadStep(step) {
+  const root = stageDownloads();
+  const launch = downloadLaunch();
+  const stack = document.getElementById("downloadStack");
+  if (root) root.dataset.step = step;
+  if (launch) launch.setAttribute("aria-expanded", step === "closed" ? "false" : "true");
+  if (stack) stack.setAttribute("aria-hidden", step === "closed" ? "true" : "false");
+  downloadActions.forEach((action) => {
+    const btn = document.getElementById(action.id);
+    if (!btn) return;
+    const hide = step === "closed" || (step === "armed" && action.id !== armedDownloadId);
+    btn.tabIndex = hide ? -1 : 0;
+  });
+}
+
+function closeDownloadMenu() {
+  armedDownloadId = "";
+  downloadActions.forEach((action) => {
+    const btn = document.getElementById(action.id);
+    const tile = btn?.closest(".download-tile");
+    btn?.classList.remove("is-confirm");
+    tile?.classList.remove("is-armed");
+    btn?.setAttribute("aria-label", action.label);
+  });
+  setDownloadStep("closed");
+}
+
 function setDownloadArmed(id) {
   armedDownloadId = id || "";
   downloadActions.forEach((action) => {
     const btn = document.getElementById(action.id);
+    const tile = btn?.closest(".download-tile");
     const armed = action.id === armedDownloadId;
-    btn.classList.toggle("is-confirm", armed);
-    btn.setAttribute("aria-label", armed ? `Confirm download: ${action.label}` : action.label);
+    btn?.classList.toggle("is-confirm", armed);
+    tile?.classList.toggle("is-armed", armed);
+    btn?.setAttribute("aria-label", armed ? `Confirm download: ${action.label}` : action.label);
   });
+  const root = stageDownloads();
+  if (root && root.dataset.step !== "closed") {
+    setDownloadStep(armedDownloadId ? "armed" : "open");
+  }
 }
 
 function requestDownload(action) {
@@ -1189,14 +1788,33 @@ function sizeBrochurePagesNative() {
   });
 }
 
+function brochureErrorMessage(err) {
+  if (!err) return "Could not build the brochure.";
+  if (typeof err === "string" && err.trim()) return err;
+  if (err.message) return err.message;
+  return "Could not build the brochure.";
+}
+
+async function inlineCloneImages(root) {
+  await Promise.all(
+    [...root.querySelectorAll("img")].map(async (img) => {
+      const src = img.getAttribute("src") || "";
+      if (!src || src === PLACEHOLDER || src.startsWith("data:")) return;
+      try {
+        img.src = await urlToDataUrl(src);
+        await img.decode?.().catch(() => undefined);
+      } catch {
+        img.src = PLACEHOLDER;
+      }
+    })
+  );
+}
+
 async function captureBrochurePage(pageEl) {
   const options = {
     width: BROCHURE_W,
     height: BROCHURE_H,
-    pixelRatio: 3,
-    cacheBust: true,
-    includeQueryParams: true,
-    imagePlaceholder: PLACEHOLDER,
+    pixelRatio: 2,
     style: {
       transform: "none",
       transformOrigin: "top left",
@@ -1213,21 +1831,78 @@ async function captureBrochurePage(pageEl) {
   clone.style.top = "0";
   clone.style.width = `${BROCHURE_W}px`;
   clone.style.height = `${BROCHURE_H}px`;
+  const listingEl = clone.querySelector(".listing");
+  if (listingEl) {
+    listingEl.classList.add("is-exporting");
+    listingEl.style.transform = `scale(${BROCHURE_H / LAYOUT_SIZE})`;
+    listingEl.style.transformOrigin = "top center";
+    listingEl.style.top = "0";
+    listingEl.style.marginTop = "0";
+    listingEl.style.overflow = "hidden";
+  }
   host.append(clone);
   document.body.append(host);
   try {
-    await Promise.all(
-      [...clone.querySelectorAll("img")]
-        .filter(hasRealSrc)
-        .map((img) => img.decode?.().catch(() => undefined) ?? Promise.resolve())
-    );
-    try {
-      return await toPng(clone, options);
-    } catch {
-      return await toPng(clone, { ...options, skipFonts: true });
-    }
+    await document.fonts.ready;
+    await inlineCloneImages(clone);
+    return await toPngSafe(clone, options);
+  } catch (err) {
+    throw new Error(brochureErrorMessage(err));
   } finally {
     host.remove();
+  }
+}
+
+function loadCaptureImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Could not load a listing photo."));
+    img.src = src;
+  });
+}
+
+async function captureBrochureListingImage() {
+  const page = brochurePages.querySelector(".brochure-page.is-square");
+  const photoSrcValue =
+    page?.querySelector(".bp-photo")?.currentSrc ||
+    page?.querySelector(".bp-photo")?.src ||
+    propertyUrl;
+  const bg = listing.querySelector(".listing-bg");
+  const prevDisplay = bg ? bg.style.display : "";
+  if (bg) bg.style.display = "none";
+  try {
+    const overlayUrl = await captureListingPng(2, {
+      backgroundColor: null,
+      background: "transparent",
+    });
+    const canvas = document.createElement("canvas");
+    const px = 2;
+    canvas.width = BROCHURE_W * px;
+    canvas.height = BROCHURE_H * px;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#081d56";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (photoSrcValue && photoSrcValue !== PLACEHOLDER) {
+      try {
+        const photo = await loadCaptureImage(photoSrcValue);
+        const cover = Math.max(canvas.width / photo.naturalWidth, canvas.height / photo.naturalHeight);
+        const dw = photo.naturalWidth * cover;
+        const dh = photo.naturalHeight * cover;
+        ctx.drawImage(photo, (canvas.width - dw) / 2, (canvas.height - dh) / 2, dw, dh);
+      } catch {
+        /* keep the navy fill */
+      }
+    }
+    const overlay = await loadCaptureImage(overlayUrl);
+    const side = canvas.height;
+    ctx.drawImage(overlay, (canvas.width - side) / 2, 0, side, side);
+    return canvas.toDataURL("image/png");
+  } catch (err) {
+    console.warn(err);
+    return "";
+  } finally {
+    if (bg) bg.style.display = prevDisplay;
   }
 }
 
@@ -1239,11 +1914,9 @@ async function downloadBrochure() {
   status.textContent = "Preparing brochure…";
 
   const wasBrochure = previewMode === "brochure";
-  const wasHidden = brochurePreview.hidden;
   try {
     const data = await prepareBrochureData(status);
     renderBrochurePreview();
-    brochurePreview.hidden = false;
     brochurePreview.style.position = "fixed";
     brochurePreview.style.left = "-4000px";
     brochurePreview.style.top = "0";
@@ -1251,9 +1924,12 @@ async function downloadBrochure() {
     brochurePreview.style.pointerEvents = "none";
     sizeBrochurePagesNative();
     status.textContent = "Capturing listing page…";
-    const listingPage = brochurePages.querySelector(".brochure-page.is-square");
-    if (!listingPage) throw new Error("Could not build the listing page.");
-    const listingImage = await captureBrochurePage(listingPage);
+    let listingImage = "";
+    try {
+      listingImage = await captureBrochureListingImage();
+    } catch (err) {
+      console.warn(err);
+    }
     await buildBrochurePdf(data, (message) => {
       status.textContent = message;
     }, listingImage);
@@ -1262,16 +1938,15 @@ async function downloadBrochure() {
   } catch (err) {
     console.error(err);
     status.classList.add("is-error");
-    status.textContent = err.message || "Could not build the brochure.";
+    status.textContent = brochureErrorMessage(err);
   } finally {
     brochurePreview.style.position = "";
     brochurePreview.style.left = "";
     brochurePreview.style.top = "";
     brochurePreview.style.opacity = "";
     brochurePreview.style.pointerEvents = "";
-    if (wasHidden && !wasBrochure) brochurePreview.hidden = true;
     if (wasBrochure) scaleBrochurePages();
-    setDownloadArmed("");
+    closeDownloadMenu();
     setDownloadBusy(false);
   }
 }
@@ -1284,11 +1959,9 @@ async function downloadBrochureImages() {
   status.textContent = "Preparing images…";
 
   const wasBrochure = previewMode === "brochure";
-  const wasHidden = brochurePreview.hidden;
   try {
     const data = await prepareBrochureData(status);
     renderBrochurePreview();
-    brochurePreview.hidden = false;
     brochurePreview.style.position = "fixed";
     brochurePreview.style.left = "-4000px";
     brochurePreview.style.top = "0";
@@ -1328,53 +2001,63 @@ async function downloadBrochureImages() {
   } catch (err) {
     console.error(err);
     status.classList.add("is-error");
-    status.textContent = err.message || "Could not export the images.";
+    status.textContent = brochureErrorMessage(err);
   } finally {
     brochurePreview.style.position = "";
     brochurePreview.style.left = "";
     brochurePreview.style.top = "";
     brochurePreview.style.opacity = "";
     brochurePreview.style.pointerEvents = "";
-    if (wasHidden && !wasBrochure) brochurePreview.hidden = true;
     if (wasBrochure) scaleBrochurePages();
-    setDownloadArmed("");
+    closeDownloadMenu();
     setDownloadBusy(false);
   }
 }
 
 function bindDownloadEvents() {
 downloadActions.forEach((action) => {
-  document.getElementById(action.id).addEventListener("click", () => {
+  listen(document.getElementById(action.id), "click", () => {
     requestDownload(action);
   });
 });
-document.addEventListener("click", (e) => {
-  const tile = document.getElementById(armedDownloadId)?.closest(".download-tile");
-  if (!armedDownloadId || tile?.contains(e.target)) return;
-  setDownloadArmed("");
+listen(downloadLaunch(), "click", (e) => {
+  e.stopPropagation();
+  setDownloadStep("open");
+});
+setDownloadStep("closed");
+listen(document, "click", (e) => {
+  const root = stageDownloads();
+  if (!root || root.contains(e.target) || root.dataset.step === "closed") return;
+  if (armedDownloadId) setDownloadArmed("");
+  else closeDownloadMenu();
+});
+listen(document, "keydown", (e) => {
+  if (e.key !== "Escape") return;
+  const root = stageDownloads();
+  if (!root || root.dataset.step === "closed") return;
+  if (armedDownloadId) setDownloadArmed("");
+  else closeDownloadMenu();
 });
 document.querySelectorAll(".download-tile").forEach((tile) => {
   const info = tile.querySelector(".download-info");
-  tile.addEventListener("pointerenter", () => tile.classList.add("is-hot"));
-  tile.addEventListener("pointerleave", () => tile.classList.remove("is-hot", "is-tip"));
-  info.addEventListener("pointerenter", () => tile.classList.add("is-tip"));
-  info.addEventListener("pointerleave", () => tile.classList.remove("is-tip"));
-  info.addEventListener("click", (e) => {
+  if (!info) return;
+  listen(tile, "pointerenter", () => tile.classList.add("is-hot"));
+  listen(tile, "pointerleave", () => tile.classList.remove("is-hot", "is-tip"));
+  listen(info, "pointerenter", () => tile.classList.add("is-tip"));
+  listen(info, "pointerleave", () => tile.classList.remove("is-tip"));
+  listen(info, "click", (e) => {
     e.preventDefault();
     e.stopPropagation();
   });
 });
-document.getElementById("pfPaste").addEventListener("click", pastePropertyFinderLink);
-document.getElementById("pfFetch").addEventListener("click", () => {
-  fillFromPropertyFinder(document.getElementById("pfUrl").value);
-});
-document.getElementById("pfUrl").addEventListener("keydown", (e) => {
+listen(document.getElementById("pfPaste"), "click", pastePropertyFinderLink);
+listen(document.getElementById("pfUrl"), "keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
     fillFromPropertyFinder(e.currentTarget.value);
   }
 });
-document.getElementById("pfUrl").addEventListener("paste", (e) => {
+listen(document.getElementById("pfUrl"), "paste", (e) => {
   if (imageFileFromDataTransfer(e.clipboardData)) return;
   const text = e.clipboardData?.getData("text")?.trim();
   if (!text) return;
@@ -1386,36 +2069,42 @@ document.getElementById("pfUrl").addEventListener("paste", (e) => {
   window.setTimeout(() => fillFromPropertyFinder(text), 0);
 });
 
-document.addEventListener("paste", (e) => {
-  if (isTypingTarget(e.target) && e.target.id !== "previewFrame") return;
+listen(document, "pointermove", (e) => {
+  pointerOverPreview = Boolean(e.target.closest?.("#previewWrap"));
+}, { passive: true });
+listen(document, "paste", (e) => {
+  if (isTypingTarget(e.target) && e.target.id !== "previewFrame" && !e.target.closest?.("#previewWrap")) {
+    return;
+  }
   useClipboardImage(e);
 });
 
-previewFrame.addEventListener("click", (e) => {
+listen(previewFrame, "click", (e) => {
   if (e.target.closest("[contenteditable]")) return;
   previewFrame.focus();
 });
 
 ["dragenter", "dragover"].forEach((type) => {
-  previewFrame.addEventListener(type, (e) => {
+  listen(previewFrame, type, (e) => {
     if (!imageFileFromDataTransfer(e.dataTransfer)) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "copy";
     previewFrame.classList.add("is-drop-target");
   });
 });
-previewFrame.addEventListener("dragleave", (e) => {
+listen(previewFrame, "dragleave", (e) => {
   if (e.relatedTarget && previewFrame.contains(e.relatedTarget)) return;
   previewFrame.classList.remove("is-drop-target");
 });
-previewFrame.addEventListener("drop", (e) => {
+listen(previewFrame, "drop", (e) => {
   e.preventDefault();
   previewFrame.classList.remove("is-drop-target");
   const file = imageFileFromDataTransfer(e.dataTransfer);
   if (file) applyPropertyFile(file, file.name || "Dropped photo");
 });
 
-setPose("crossed");
+paintPoseThumbs();
+setPose(firstFilledPose());
 }
 
 const FIELD_IDS = [
@@ -1450,12 +2139,20 @@ function persistablePhoto(url) {
 export function getStudioState() {
   const fields = {};
   const colors = {};
+  const sizes = {};
+  const fonts = {};
   FIELD_IDS.forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
     fields[id] = el.textContent || "";
     if (el.style.color) colors[id] = el.style.color;
+    if (el.style.fontSize) sizes[id] = el.style.fontSize;
+    if (el.style.fontFamily) fonts[id] = currentFontId(el);
   });
+  if (brandAgentName) fields.agentName = brandAgentName;
+  if (brandPhone) fields.phone = brandPhone;
+  if (brandEmail) fields.email = brandEmail;
+  if (brandInstagram) fields.instagram = brandInstagram;
 
   const title = (fields.propertyName || "").trim() || "Untitled listing";
   const listingUrl =
@@ -1469,10 +2166,10 @@ export function getStudioState() {
       headline: activeHeadline,
       comingSoonDate: comingSoonDateInput?.value || "",
       pose: activePose,
-      photoPos: document.getElementById("photoPos")?.value || "50",
+      photoPos: photoPos,
       agentScale: agentScaleInput?.value || "76",
-      agentX: agentXInput?.value || "-14",
-      agentY: agentYInput?.value || "0",
+      agentX: String(agentPosX),
+      agentY: String(agentPosY),
       listingPhotoSource,
       brochurePhotoOrder,
       coverPlaceOverride,
@@ -1481,6 +2178,8 @@ export function getStudioState() {
       propertyUrl: persistablePhoto(propertyUrl),
       fields,
       colors,
+      sizes,
+      fonts,
     },
   };
 }
@@ -1502,16 +2201,10 @@ export function applyStudioState(data = {}) {
   if (studio.headline) setHeadline(studio.headline);
   if (studio.pose && studio.pose !== "custom") setPose(studio.pose);
 
-  if (studio.photoPos != null) {
-    const photoPos = document.getElementById("photoPos");
-    if (photoPos) {
-      photoPos.value = studio.photoPos;
-      applyPhotoPosition(studio.photoPos);
-    }
-  }
+  if (studio.photoPos != null) applyPhotoPosition(studio.photoPos);
   if (studio.agentScale != null && agentScaleInput) agentScaleInput.value = studio.agentScale;
-  if (studio.agentX != null && agentXInput) agentXInput.value = studio.agentX;
-  if (studio.agentY != null && agentYInput) agentYInput.value = studio.agentY;
+  if (studio.agentX != null) agentPosX = Number(studio.agentX);
+  if (studio.agentY != null) agentPosY = Number(studio.agentY);
   applyAgentLayout();
 
   if (Array.isArray(studio.brochurePhotoOrder)) brochurePhotoOrder = studio.brochurePhotoOrder;
@@ -1520,24 +2213,43 @@ export function applyStudioState(data = {}) {
   if (studio.listingPhotoSource) listingPhotoSource = studio.listingPhotoSource;
 
   const photo = studio.listingPhotoSource
-    ? proxiedPhoto(studio.listingPhotoSource)
+    ? displayPhoto(studio.listingPhotoSource)
     : persistablePhoto(studio.propertyUrl);
-  if (photo) setPhoto(photo);
+  if (photo) setPhoto(displayPhoto(photo));
 
   const fields = studio.fields || {};
-  Object.entries(fields).forEach(([id, value]) => setField(id, value));
+  Object.entries(fields).forEach(([id, value]) => {
+    if (PROFILE_FIELDS.includes(id)) return;
+    setField(id, value);
+  });
   Object.entries(studio.colors || {}).forEach(([id, color]) => {
     const el = document.getElementById(id);
     if (el && color) el.style.color = color;
   });
+  Object.entries(studio.sizes || {}).forEach(([id, size]) => {
+    const el = document.getElementById(id);
+    if (!el || !size) return;
+    el.style.fontSize = String(size).includes("px") ? size : `${size}px`;
+  });
+  Object.entries(studio.fonts || {}).forEach(([id, fontId]) => {
+    const el = document.getElementById(id);
+    const font = TEXT_FONTS.find((item) => item.id === fontId);
+    if (el && font) el.style.fontFamily = font.family;
+  });
 
-  if (studio.previewMode) setPreviewMode(studio.previewMode);
+  if (studio.previewMode) setPreviewMode(studio.previewMode, { instant: true });
+  applyBrandContacts();
   renderListingGallery();
   if (previewMode === "brochure") renderBrochurePreview();
+  requestAnimationFrame(() => scalePreview());
 }
 
 export function applyBrand(brand = {}) {
-  brandAgencyName = String(brand.agencyName || "").trim() || "Your agency";
+  brandAgencyName = String(brand.agencyName || "").trim();
+  brandAgentName = String(brand.agentName || "").trim();
+  brandPhone = String(brand.phone || "").trim();
+  brandEmail = String(brand.email || "").trim();
+  brandInstagram = String(brand.instagram || "").trim();
   const brandEl = document.querySelector(".brand");
   const nameEl = document.getElementById("brandName");
   const subEl = document.getElementById("brandSub");
@@ -1555,28 +2267,32 @@ export function applyBrand(brand = {}) {
       brandEl.classList.remove("has-logo");
     }
   }
-  if (brand.agentName) setField("agentName", brand.agentName);
-  if (brand.phone) setField("phone", brand.phone);
-  if (brand.email) setField("email", brand.email);
-  if (brand.instagram) setField("instagram", brand.instagram);
-  if (brand.cutoutUrl) setAgent(brand.cutoutUrl, "custom");
+  applyBrandContacts();
+  poseUrls = new Array(MAX_POSES)
+    .fill("")
+    .map((_, index) => String(brand.poses?.[index] || "").trim());
+  paintPoseThumbs();
+  setPose(poseUrls[activePose - 1] ? activePose : firstFilledPose());
 }
 
 export function bootStudio(hooks = {}) {
   studioHooks = hooks;
-  if (bootStudio.done) return;
-  bootStudio.done = true;
+  resetStudioBindings();
   bindDom();
   mountIcons();
   scalePreview();
-  window.addEventListener("resize", () => {
+  listen(window, "resize", () => {
     scalePreview();
     scaleBrochurePages();
   });
-  new ResizeObserver(scalePreview).observe(previewFrame);
-  new ResizeObserver(scaleBrochurePages).observe(brochurePreview);
+  observeSize(previewWrap, scalePreview);
+  observeSize(brochurePreview, scaleBrochurePages);
   bindStudioEvents();
   bindDownloadEvents();
-  document.querySelector(".app")?.addEventListener("input", () => studioHooks.onChange?.());
-  document.querySelector(".app")?.addEventListener("change", () => studioHooks.onChange?.());
+  setPreviewPaneState(previewFrame, true);
+  setPreviewPaneState(brochurePreview, false);
+  syncSlideLids();
+  renderListingGallery();
+  listen(document.querySelector(".app"), "input", () => studioHooks.onChange?.());
+  listen(document.querySelector(".app"), "change", () => studioHooks.onChange?.());
 }

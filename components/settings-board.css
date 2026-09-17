@@ -1,0 +1,79 @@
+.settings-status {
+  margin: 0;
+  color: var(--app-page-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.settings-status.is-error {
+  color: var(--app-danger);
+}
+
+.settings-themes {
+  --slide-pad: 6px;
+  max-width: 560px;
+  border-radius: 22px;
+  background: var(--app-well);
+}
+
+.settings-themes .slide-lid {
+  border-radius: 16px;
+  background: var(--app-lid);
+}
+
+.settings-theme {
+  appearance: none;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--app-well-type);
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-theme:hover {
+  border: 0;
+}
+
+.settings-theme.is-active {
+  border: 0;
+  box-shadow: none;
+  color: var(--app-lid-type);
+}
+
+.settings-theme-preview {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.settings-theme-preview i {
+  display: block;
+  height: 18px;
+}
+
+.settings-theme-preview span {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  height: 72px;
+}
+
+.settings-theme-preview b,
+.settings-theme-preview em {
+  display: block;
+}
+
+.settings-theme strong {
+  font-size: 16px;
+  letter-spacing: -0.03em;
+}
+
+.settings-theme small {
+  color: color-mix(in srgb, currentColor 68%, transparent);
+  font-size: 13px;
+  line-height: 1.4;
+}

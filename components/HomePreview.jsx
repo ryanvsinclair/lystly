@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { SlideToggle } from "@/components/SlideToggle";
 import { clampAgentPosition, listingPointerScale } from "@/lib/agent-drag.js";
 
 const ICONS = {
@@ -32,12 +33,48 @@ const AGENT_POSES = {
   },
 };
 
-const MOCK_AGENT = {
-  name: "Rayan Alami",
-  phone: "+971 50 123 4567",
-  email: "alex.reid@youragency.ae",
-  instagram: "alexreid",
+const FALLBACK_BRAND = {
+  agencyName: "Your agency",
+  agentName: "Your name",
+  phone: "",
+  email: "",
+  instagram: "",
+  logoUrl: "",
+  cutoutUrl: "",
 };
+
+const GUEST_CUTOUT = "/agents/default-agent.png";
+
+const GUEST_POSE = {
+  src: GUEST_CUTOUT,
+  x: 28,
+  y: 0,
+  height: 720,
+  scale: 76,
+};
+
+const GUEST_BRAND = {
+  agencyName: "Your agency",
+  agentName: "Daniel Hart",
+  phone: "+971 50 918 2746",
+  email: "daniel.hart@northshore.ae",
+  instagram: "danielhart",
+  logoUrl: "",
+  cutoutUrl: GUEST_CUTOUT,
+};
+
+function displayBrand(brand) {
+  if (!brand) return GUEST_BRAND;
+  return {
+    agencyName: brand.agencyName || "",
+    agentName: brand.agentName || "",
+    phone: brand.phone || "",
+    email: brand.email || "",
+    instagram: brand.instagram || "",
+    logoUrl: brand.logoUrl || "",
+    cutoutUrl: brand.cutoutUrl || "",
+  };
+}
 
 const DOWNLOADS = [
   { id: "png", label: "PNG", icon: "image", tip: "Instagram square" },
@@ -136,21 +173,26 @@ function landingBrochurePages(listing) {
   ];
 }
 
-function agentLayout(pose, customSrc, pos) {
-  const preset = AGENT_POSES[pose] || AGENT_POSES.crossed;
-  const height = (pose === "custom" ? 640 : preset.height) * (preset.scale / 100);
+function agentLayout(pose, customSrc, pos, { stock = false } = {}) {
+  const guestCutout = customSrc === GUEST_CUTOUT;
+  const preset = guestCutout ? GUEST_POSE : AGENT_POSES[pose] || AGENT_POSES.crossed;
+  const src = customSrc || (stock ? preset.src : "");
+  const height =
+    (src && (customSrc || pose === "custom") && !guestCutout ? 640 : preset.height) *
+    (preset.scale / 100);
   return {
-    src: customSrc || preset.src,
-    pose: customSrc ? "custom" : pose,
+    src,
+    pose: customSrc && !guestCutout ? "custom" : guestCutout ? "crossed" : pose,
     x: pos?.x ?? preset.x,
-    y: pos?.y ?? 0,
+    y: pos?.y ?? preset.y ?? 0,
     height,
   };
 }
 
-function ListingSquare({ listing, agent, scale, draggable, onAgentMove }) {
+function ListingSquare({ listing, agent, brand, scale, draggable, onAgentMove }) {
   const listingRef = useRef(null);
   const photo = photoSrc(listing.photo);
+  brand = brand || FALLBACK_BRAND;
 
   function onPointerDown(event) {
     if (!draggable || !onAgentMove) return;
@@ -190,16 +232,17 @@ function ListingSquare({ listing, agent, scale, draggable, onAgentMove }) {
   return (
     <article
       ref={listingRef}
-      className={`listing has-agent pose-${agent.pose}${photo ? " has-photo" : ""}`}
+      className={`listing${agent.src ? ` has-agent pose-${agent.pose}` : ""}${photo ? " has-photo" : ""}`}
       style={scale != null ? { transform: `scale(${scale})` } : undefined}
     >
       <div className="listing-bg">
         <img alt="" src={photo || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="} />
         <div className="bg-fallback">Paste a listing link</div>
       </div>
-      <div className="brand home-brand-placeholder">
-        <span className="brand-name">Your agency</span>
-        <span className="brand-sub">LOGO</span>
+      <div className={`brand${brand.logoUrl ? " has-logo" : " home-brand-placeholder"}`}>
+        {brand.logoUrl ? <img className="brand-logo" alt="" src={brand.logoUrl} /> : null}
+        <span className="brand-name">{brand.agencyName || FALLBACK_BRAND.agencyName}</span>
+        {brand.logoUrl ? null : <span className="brand-sub">LOGO</span>}
       </div>
       <div className="card">
         <div className="card-face">
@@ -243,20 +286,26 @@ function ListingSquare({ listing, agent, scale, draggable, onAgentMove }) {
               </div>
             </div>
             <div className="agent-row">
-              <p className="aname">{MOCK_AGENT.name}</p>
+              <p className="aname">{brand.agentName || FALLBACK_BRAND.agentName}</p>
               <div className="contacts">
-                <span>
-                  <ContactIcon name="phone" />
-                  <b>{MOCK_AGENT.phone}</b>
-                </span>
-                <span>
-                  <ContactIcon name="mail" />
-                  <b>{MOCK_AGENT.email}</b>
-                </span>
-                <span>
-                  <ContactIcon name="ig" />
-                  <b>{MOCK_AGENT.instagram}</b>
-                </span>
+                {brand.phone ? (
+                  <span>
+                    <ContactIcon name="phone" />
+                    <b>{brand.phone}</b>
+                  </span>
+                ) : null}
+                {brand.email ? (
+                  <span>
+                    <ContactIcon name="mail" />
+                    <b>{brand.email}</b>
+                  </span>
+                ) : null}
+                {brand.instagram ? (
+                  <span>
+                    <ContactIcon name="ig" />
+                    <b>{brand.instagram}</b>
+                  </span>
+                ) : null}
               </div>
             </div>
           </div>
@@ -264,19 +313,22 @@ function ListingSquare({ listing, agent, scale, draggable, onAgentMove }) {
         <div className="card-glare" />
         <div className="card-rim" aria-hidden="true" />
       </div>
-      <img
-        className={`agent-cutout${draggable ? " is-draggable" : ""}`}
-        alt=""
-        src={agent.src}
-        style={{ left: `${agent.x}px`, bottom: `${agent.y}px`, height: `${agent.height}px` }}
-        draggable={false}
-        onPointerDown={onPointerDown}
-      />
+      {agent.src ? (
+        <img
+          className={`agent-cutout${draggable ? " is-draggable" : ""}`}
+          alt=""
+          src={agent.src}
+          style={{ left: `${agent.x}px`, bottom: `${agent.y}px`, height: `${agent.height}px` }}
+          draggable={false}
+          onPointerDown={onPointerDown}
+        />
+      ) : null}
     </article>
   );
 }
 
-function BrochurePreview({ listing, agent }) {
+function BrochurePreview({ listing, agent, brand }) {
+  brand = brand || FALLBACK_BRAND;
   const wrapRef = useRef(null);
   const [scale, setScale] = useState(0.68);
   const pages = landingBrochurePages(listing);
@@ -308,7 +360,7 @@ function BrochurePreview({ listing, agent }) {
                   <>
                     <img className="bp-photo" alt="" src={photoSrc(page.photo)} />
                     <div className="bp-listing-hold">
-                      <ListingSquare listing={listing} agent={agent} />
+                      <ListingSquare listing={listing} agent={agent} brand={brand} />
                     </div>
                   </>
                 ) : (
@@ -335,7 +387,7 @@ function BrochurePreview({ listing, agent }) {
                       </>
                     ) : (
                       <div className="bp-photo-footer">
-                        <span>Your agency</span>
+                        <span>{brand.agencyName || FALLBACK_BRAND.agencyName}</span>
                         <span className="bp-footer-label">{page.label}</span>
                         <span className="bp-footer-page">
                           {page.page} / {page.total}
@@ -354,18 +406,25 @@ function BrochurePreview({ listing, agent }) {
   );
 }
 
-export function HomePreview({ listing }) {
+export function HomePreview({ listing, brand = null }) {
   const router = useRouter();
   const frameRef = useRef(null);
-  const fileRef = useRef(null);
   const overRef = useRef(false);
   const [mode, setMode] = useState("listing");
   const [scale, setScale] = useState(0.48);
   const [pose, setPose] = useState("crossed");
-  const [cutout, setCutout] = useState("");
-  const [agentPos, setAgentPos] = useState({ x: AGENT_POSES.crossed.x, y: 0 });
+  const [cutout, setCutout] = useState(brand?.cutoutUrl || "");
+  const [agentPos, setAgentPos] = useState({ x: GUEST_POSE.x, y: GUEST_POSE.y });
   const [dropping, setDropping] = useState(false);
-  const agent = agentLayout(pose, cutout, agentPos);
+  const shownBrand = displayBrand(brand);
+  const agentSrc = cutout || shownBrand.cutoutUrl || "";
+  const agent = agentLayout(pose, agentSrc, agentPos, {
+    stock: !brand && !agentSrc,
+  });
+
+  useEffect(() => {
+    if (brand?.cutoutUrl) setCutout(brand.cutoutUrl);
+  }, [brand?.cutoutUrl]);
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -422,24 +481,17 @@ export function HomePreview({ listing }) {
       }}
     >
       <div className="home-preview-bar">
-        <div className="home-preview-switch" role="tablist" aria-label="Preview mode">
-          <button
-            type="button"
-            className={mode === "listing" ? "is-active" : ""}
-            aria-selected={mode === "listing"}
-            onClick={() => setMode("listing")}
-          >
-            Listing
-          </button>
-          <button
-            type="button"
-            className={mode === "brochure" ? "is-active" : ""}
-            aria-selected={mode === "brochure"}
-            onClick={() => setMode("brochure")}
-          >
-            Brochure
-          </button>
-        </div>
+        <SlideToggle
+          className="home-preview-switch"
+          ariaLabel="Preview mode"
+          tablist
+          value={mode}
+          options={[
+            { id: "listing", label: "Listing" },
+            { id: "brochure", label: "Brochure" },
+          ]}
+          onChange={setMode}
+        />
         <div className="home-preview-downloads">
           {DOWNLOADS.map((item) => (
             <button
@@ -477,45 +529,28 @@ export function HomePreview({ listing }) {
           <div
             className={`preview-frame${dropping ? " is-drop-target" : ""}`}
             ref={frameRef}
-            tabIndex={0}
             role="img"
-            aria-label="Listing preview. Paste or drop an agent cutout."
-            onClick={(event) => {
-              if (event.target.closest(".agent-cutout")) return;
-              fileRef.current?.click();
-            }}
+            aria-label="Listing preview. Drop or paste an agent cutout."
           >
             <ListingSquare
               listing={listing}
               agent={agent}
+              brand={shownBrand}
               scale={scale}
-              draggable
+              draggable={Boolean(brand) || Boolean(cutout)}
               onAgentMove={setAgentPos}
             />
-            <div
-              className="home-preview-info"
-              onClick={(event) => event.stopPropagation()}
-            >
+            <div className="home-preview-info">
               <button type="button" aria-label="How to add an agent cutout">
                 i
               </button>
-              <p>Click to add your cutout. Use a transparent PNG.</p>
+              <p>Drop or paste a transparent PNG to try your cutout.</p>
             </div>
           </div>
         ) : (
-          <BrochurePreview listing={listing} agent={agent} />
+          <BrochurePreview listing={listing} agent={agent} brand={shownBrand} />
         )}
       </div>
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        hidden
-        onChange={(event) => {
-          applyCutout(event.target.files?.[0]);
-          event.target.value = "";
-        }}
-      />
     </div>
   );
 }

@@ -16,7 +16,7 @@ const PORTALS = [
   },
   {
     id: "crm",
-    label: "McCone CRM",
+    label: "CRM",
     hosts: ["mcconecrm.com"],
     imageHosts: [],
     currency: "AED",
@@ -87,7 +87,7 @@ const PORTALS = [
 ];
 
 const SUPPORTED_LINK_HINT =
-  "Use a listing link from Property Finder, Bayut, or McCone CRM.";
+  "Use a listing link from Property Finder, Bayut, or your CRM.";
 
 export const SOURCE_LABELS = Object.fromEntries(
   PORTALS.map((portal) => [portal.id, portal.label])
@@ -772,7 +772,7 @@ function extractJsonObject(html, key) {
   return null;
 }
 
-function mapMcConeListing(prop, agent) {
+function mapCrmListing(prop, agent) {
   const rent = /rent/i.test(prop.offering_type || "");
   const community = prop.community || "";
   const city = /dubai|abu dhabi|sharjah|ajman|ras al khaimah|fujairah|umm al/i.test(
@@ -786,7 +786,7 @@ function mapMcConeListing(prop, agent) {
 
   return {
     source: "crm",
-    sourceLabel: "McCone CRM",
+    sourceLabel: "CRM",
     propertyName: prop.building_name || prop.title || "",
     cluster: prop.building_name || prop.title || "",
     community,
@@ -823,7 +823,7 @@ function crmPhotosFromHtml(html) {
   );
 }
 
-function extractMcConeFromMarkup(html) {
+function extractCrmFromMarkup(html) {
   const photos = crmPhotosFromHtml(html);
   const photo = photos[0] || "";
   const price = html.match(/AED[\s\u00a0]+([\d,]+)\s*\/\s*(yr|mo|wk)/i);
@@ -850,11 +850,11 @@ function extractMcConeFromMarkup(html) {
       html.match(/>([^<]+\|[^<]+)</)?.[1] ||
       ""
   )
-    .replace(/\s*\|\s*McCone.*$/i, "")
+    .replace(/\s*\|\s*[^|<]+$/i, "")
     .trim();
 
   if (!building && !price && !photo) return null;
-  return mapMcConeListing(
+  return mapCrmListing(
     {
       title,
       building_name: building,
@@ -871,12 +871,12 @@ function extractMcConeFromMarkup(html) {
   );
 }
 
-function extractMcConeListing(html) {
+function extractCrmListing(html) {
   const prop = extractJsonObject(html, "listing");
   if (prop?.id || prop?.title || prop?.building_name) {
-    return mapMcConeListing(prop, extractJsonObject(html, "agent") || {});
+    return mapCrmListing(prop, extractJsonObject(html, "agent") || {});
   }
-  return extractMcConeFromMarkup(html);
+  return extractCrmFromMarkup(html);
 }
 
 function extractBayut(html, portal) {
@@ -1142,7 +1142,7 @@ function extractForPortal(portal, html) {
     case "pf":
       return extractNextProperty(html) || extractGeneric(html, portal);
     case "crm":
-      return extractMcConeListing(html);
+      return extractCrmListing(html);
     case "bayut":
       return extractBayut(html, portal) || extractGeneric(html, portal);
     case "wahi":
@@ -1231,7 +1231,7 @@ export async function scrapeListing(rawUrl) {
   const listing = extractListingFromHtml(html, url);
   if (!listing) {
     if (portal.id === "crm" && /\/listings\//i.test(parsed.pathname)) {
-      throw new Error("Use the public share link, like mcconecrm.com/listing/v89gsfyr.");
+      throw new Error("Use the public share link from your CRM, not the internal listings page.");
     }
     throw new Error("Could not read that listing. Check the link and try again.");
   }
