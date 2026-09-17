@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AppBarSlot } from "@/components/AppBar";
 import { StudioMarkup } from "@/components/StudioMarkup";
-import { saveAgentPose, saveProject, saveProjectPhoto } from "@/app/app/actions";
+import { saveAgentPose, saveProject } from "@/app/app/actions";
 import { MAX_AGENT_POSES } from "@/lib/brand.js";
 import "@/src/styles.css";
 
@@ -30,7 +30,8 @@ export function StudioClient({ project, brand }) {
     setSaveLabel("Saving…");
     try {
       const state = await api.getPersistableStudioState();
-      await saveProject(projectRef.current.id, state);
+      const result = await saveProject(projectRef.current.id, state);
+      if (!result?.ok) throw new Error(result?.error || "Could not save project.");
       if (dirtyRef.current) {
         setDirty(true);
         setSaveLabel("Unsaved");
@@ -43,7 +44,9 @@ export function StudioClient({ project, brand }) {
       setDirty(true);
       const message = String(err?.message || "");
       setSaveLabel(
-        /unexpected response/i.test(message) ? "Could not save. Try again." : message || "Save failed"
+        /unexpected response|Server Components render/i.test(message)
+          ? "Could not save. Try again."
+          : message || "Save failed"
       );
     } finally {
       savingRef.current = false;
@@ -62,11 +65,6 @@ export function StudioClient({ project, brand }) {
           dirtyRef.current = true;
           setDirty(true);
           setSaveLabel("Unsaved");
-        },
-        async onUploadPhoto(file) {
-          const body = new FormData();
-          body.set("file", file);
-          return saveProjectPhoto(projectRef.current.id, body);
         },
         async onUploadPose(slot, file) {
           const body = new FormData();

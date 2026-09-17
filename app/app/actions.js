@@ -15,8 +15,6 @@ import { createClient } from "@/lib/supabase/server";
 import { isThemeId, isThemeMode } from "@/lib/themes.js";
 
 const POSE_TYPES = ["image/png", "image/webp"];
-const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
 const MAX_SAVE_CHARS = 6 * 1024 * 1024;
 
 async function requireUser() {
@@ -87,69 +85,30 @@ export async function deleteProject(formData) {
 }
 
 export async function saveProject(id, payload = {}) {
-  const { supabase } = await requireSignedIn();
-  if (!id) throw new Error("Could not save project.");
-  if (payloadChars(payload) > MAX_SAVE_CHARS) {
-    throw new Error("This listing is too large to save. Remove a photo and try again.");
-  }
-
-  const { error } = await supabase
-    .from("projects")
-    .update({
-      title: payload.title || "Untitled listing",
-      listing_url: payload.listing_url || null,
-      listing: payload.listing || {},
-      studio: payload.studio || {},
-    })
-    .eq("id", id);
-
-  if (error) {
-    throw new Error(error.message || "Could not save project.");
-  }
-}
-
-export async function saveProjectPhoto(projectId, formData) {
-  const { supabase, user } = await requireSignedIn();
-  const file = formData.get("file");
-  const id = String(projectId || "");
-
-  if (!id) throw new Error("Could not save that photo.");
-  if (!file || typeof file === "string" || !file.size) {
-    throw new Error("Pick a photo to add.");
-  }
-  if (file.size > MAX_PHOTO_BYTES) {
-    throw new Error("That photo is too large to save.");
-  }
-
-  const type = file.type === "image/jpg" ? "image/jpeg" : file.type;
-  if (!PHOTO_TYPES.includes(type)) {
-    throw new Error("Use a JPG, PNG, or WebP photo.");
-  }
-
-  const { data: project } = await supabase
-    .from("projects")
-    .select("id")
-    .eq("id", id)
-    .maybeSingle();
-  if (!project) throw new Error("Could not find that project.");
-
-  const ext = type === "image/png" ? "png" : type === "image/webp" ? "webp" : "jpg";
-  const path = `${user.id}/${id}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("project-photos").upload(path, file, {
-    contentType: type,
-    upsert: false,
-  });
-  if (error) {
-    const message = error.message || "";
-    if (/bucket not found/i.test(message)) {
-      throw new Error("Photo storage is not ready yet.");
+  try {
+    const { supabase } = await requireSignedIn();
+    if (!id) return { ok: false, error: "Could not save project." };
+    if (payloadChars(payload) > MAX_SAVE_CHARS) {
+      return { ok: false, error: "This listing is too large to save. Remove a photo and try again." };
     }
-    throw new Error(message || "Could not save that photo.");
-  }
 
-  const { data } = supabase.storage.from("project-photos").getPublicUrl(path);
-  if (!data?.publicUrl) throw new Error("Could not save that photo.");
-  return { url: data.publicUrl };
+    const { error } = await supabase
+      .from("projects")
+      .update({
+        title: payload.title || "Untitled listing",
+        listing_url: payload.listing_url || null,
+        listing: payload.listing || {},
+        studio: payload.studio || {},
+      })
+      .eq("id", id);
+
+    if (error) {
+      return { ok: false, error: error.message || "Could not save project." };
+    }
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message || "Could not save project." };
+  }
 }
 
 export async function saveAgentPose(formData) {

@@ -47,7 +47,6 @@ let agentScaleInput;
 let agentPosX = POSE_START_X;
 let agentPosY = 0;
 let studioHooks = {};
-let photoUploadReady = true;
 
 const HEADLINES = {
   "coming-soon": { kicker: "COMING", status: "SOON" },
@@ -1075,49 +1074,21 @@ async function persistGalleryPhoto(file) {
   }
 }
 
-async function dataUrlToFile(dataUrl, name = "photo.jpg") {
-  const response = await fetch(dataUrl);
-  const blob = await response.blob();
-  const type = blob.type || "image/jpeg";
-  const ext = type === "image/png" ? "png" : type === "image/webp" ? "webp" : "jpg";
-  const base = String(name || "photo").replace(/\.[^.]+$/, "") || "photo";
-  return new File([blob], `${base}.${ext}`, { type });
-}
-
-async function uploadLocalPhoto(dataUrl, name = "photo.jpg") {
-  if (!isEmbeddedPhoto(dataUrl)) return dataUrl;
-  if (dataUrl.length > 400000) {
-    try {
-      dataUrl = await compressPhotoDataUrl(dataUrl);
-    } catch {
-      // Keep the original if compression fails.
-    }
-  }
-  const upload = studioHooks.onUploadPhoto;
-  if (!upload || !photoUploadReady) return dataUrl;
-  try {
-    const result = await upload(await dataUrlToFile(dataUrl, name));
-    const url = result?.url || "";
-    if (!url) throw new Error("Could not save that photo.");
-    return url;
-  } catch (err) {
-    const message = String(err?.message || "");
-    if (/not ready|bucket not found/i.test(message)) {
-      photoUploadReady = false;
-      return dataUrl;
-    }
-    throw err;
-  }
-}
-
 async function persistLocalPhoto(file) {
-  return uploadLocalPhoto(await persistGalleryPhoto(file), file?.name || "photo.jpg");
+  return persistGalleryPhoto(file);
+}
+
+async function shrinkEmbeddedPhoto(url) {
+  if (!isEmbeddedPhoto(url) || url.length <= 400000) return url;
+  try {
+    return await compressPhotoDataUrl(url);
+  } catch {
+    return url;
+  }
 }
 
 async function replaceEmbeddedPhotos(value) {
-  if (typeof value === "string") {
-    return isEmbeddedPhoto(value) ? uploadLocalPhoto(value) : value;
-  }
+  if (typeof value === "string") return shrinkEmbeddedPhoto(value);
   if (Array.isArray(value)) {
     return Promise.all(value.map(replaceEmbeddedPhotos));
   }
@@ -2409,7 +2380,6 @@ export function applyBrand(brand = {}) {
 
 export function bootStudio(hooks = {}) {
   studioHooks = hooks;
-  photoUploadReady = true;
   resetStudioBindings();
   bindDom();
   mountIcons();
