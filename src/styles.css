@@ -900,16 +900,39 @@ select:focus-visible,
 }
 
 .stage-bar .download-status {
+  flex: 0 1 auto;
+  min-width: 0;
   margin: 0;
   letter-spacing: 0;
   text-transform: none;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: right;
+  text-overflow: ellipsis;
+  transform: translateX(14px);
+  pointer-events: none;
+  transition:
+    max-width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.22s ease,
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    margin 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stage-bar .download-status.is-on {
+  max-width: 16rem;
+  margin-right: 10px;
+  opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .stage-bar .download-launch,
   .stage-bar .download-stack,
   .stage-bar .download-tile,
-  .stage-bar .download-btn .download-glyph {
+  .stage-bar .download-btn .download-glyph,
+  .stage-bar .download-status {
     transition: none;
   }
 }
@@ -2182,6 +2205,17 @@ select:focus-visible,
 
 .stat:not(:last-child) {
   border-right: 1px solid #d7deea;
+}
+
+.listing.is-sold .stat[data-stat="cheques"],
+.listing.is-sold .stat[data-stat="term"] {
+  display: none;
+}
+
+.listing.is-sold .stat[data-stat="price"],
+.listing.is-sold.is-tpl-side .stat[data-stat="price"] {
+  border-right: 0;
+  border-bottom: 0;
 }
 
 .stat-icon {

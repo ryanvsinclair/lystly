@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lystly design sheet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --font-outfit: "Outfit", sans-serif;
+      --app-page: #f2f2f7;
+      --app-page-type: #111111;
+      --app-page-muted: rgba(17, 17, 17, 0.62);
+      --app-panel: #ffffff;
+      --app-panel-border: rgba(17, 17, 17, 0.12);
+      --app-card: #ffffff;
+      --app-accent: #111111;
+      --app-accent-type: #ffffff;
+      --app-accent-soft: rgba(17, 17, 17, 0.08);
+      --app-danger: #b42318;
+      --app-shadow: rgba(17, 17, 17, 0.12);
+      --app-well: #3a3a3c;
+      --app-well-type: #ffffff;
+      --app-lid: #ffffff;
+      --app-lid-type: #111111;
+      --teal: #042f2e;
+      --cream: #f4f0e8;
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-mode="dark"] {
+      --app-page: #111111;
+      --app-page-type: #f2f2f7;
+      --app-page-muted: rgba(242, 242, 247, 0.68);
+      --app-panel: #2c2c2e;
+      --app-panel-border: rgba(242, 242, 247, 0.14);
+      --app-card: #2c2c2e;
+      --app-accent: #f2f2f7;
+      --app-accent-type: #111111;
+      --app-accent-soft: rgba(242, 242, 247, 0.14);
+      --app-danger: #ffb4b4;
+      --app-shadow: rgba(0, 0, 0, 0.4);
+      --app-well: #3a3a3c;
+      --app-well-type: #f2f2f7;
+      --app-lid: #e5e5ea;
+      --app-lid-type: #111111;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: var(--font-outfit);
+      background: var(--app-page);
+      color: var(--app-page-type);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .bar {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      background: var(--app-card);
+    }
+    .mark {
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      font-size: 22px;
+    }
+    .bar-meta {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--app-page-muted);
+    }
+
+    main { padding: 32px 40px 80px; max-width: 1100px; }
+
+    h1.page {
+      margin: 0 0 8px;
+      font-size: 40px;
+      letter-spacing: -0.04em;
+    }
+    .lede {
+      margin: 0 0 32px;
+      max-width: 560px;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--app-page-muted);
+    }
+
+    h2 {
+      margin: 40px 0 14px;
+      font-size: 22px;
+      letter-spacing: -0.03em;
+    }
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--app-page-muted);
+      margin: 0 0 8px;
+    }
+
+    .brief {
+      background: var(--app-card);
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: inset 0 0 0 1px var(--app-panel-border);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .brief code {
+      font-family: inherit;
+      font-weight: 600;
+    }
+
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    .swatch {
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px var(--app-panel-border);
+      background: var(--app-card);
+    }
+    .swatch i { display: block; height: 72px; }
+    .swatch p {
+      margin: 0;
+      padding: 10px 12px 12px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .swatch strong { display: block; font-size: 13px; letter-spacing: -0.02em; }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-primary, .btn-secondary, .btn-danger, .btn-ghost {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--app-accent); color: var(--app-accent-type); }
+    .btn-secondary {
+      background: transparent;
+      color: var(--app-page-type);
+      box-shadow: inset 0 0 0 1.5px var(--app-panel-border);
+    }
+    .btn-danger {
+      background: transparent;
+      color: var(--app-danger);
+      box-shadow: inset 0 0 0 1.5px var(--app-danger);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--app-page-type);
+      padding: 7px 10px;
+    }
+    .btn-ghost:hover { background: var(--app-accent-soft); }
+
+    input[type="search"], input[type="email"] {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 16px;
+      font: inherit;
+      background: var(--app-card);
+      color: var(--app-page-type);
+      box-shadow: inset 0 0 0 1px var(--app-panel-border);
+      min-width: 220px;
+    }
+    input::placeholder { color: var(--app-page-muted); }
+    input:focus { outline: none; }
+
+    .slide-well {
+      --slide-pad: 4px;
+      --slots: 2;
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(var(--slots), minmax(0, 1fr));
+      padding: var(--slide-pad);
+      border-radius: 999px;
+      background: var(--app-well);
+    }
+    .slide-lid {
+      position: absolute;
+      top: var(--slide-pad);
+      bottom: var(--slide-pad);
+      left: var(--slide-pad);
+      width: calc((100% - var(--slide-pad) * 2) / var(--slots));
+      border-radius: inherit;
+      background: var(--app-lid);
+      pointer-events: none;
+      transition: transform 0.28s var(--ease-out);
+    }
+    .slide-well[data-index="1"] .slide-lid { transform: translateX(100%); }
+    .slide-well button {
+      position: relative;
+      z-index: 1;
+      border: 0;
+      background: transparent;
+      color: var(--app-well-type);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    .slide-well button.is-active { color: var(--app-lid-type); }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--app-card);
+      border-radius: 18px;
+      padding: 18px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: inset 0 0 0 1px var(--app-panel-border);
+    }
+    .card h3 { margin: 0 0 8px; font-size: 18px; letter-spacing: -0.03em; }
+    .card time { color: var(--app-page-muted); font-size: 13px; }
+
+    .type-spec p { margin: 0 0 12px; }
+    .display { font-size: 40px; font-weight: 700; letter-spacing: -0.04em; line-height: 0.95; }
+    .body { font-size: 16px; line-height: 1.5; max-width: 460px; }
+
+    .teal {
+      margin: 40px 0 0;
+      background: #042f2e;
+      color: #f4f0e8;
+      border-radius: 22px;
+      padding: 32px 36px;
+    }
+    .teal h2 { margin-top: 0; color: #f4f0e8; }
+    .teal p { color: rgba(244, 240, 232, 0.82); max-width: 480px; line-height: 1.5; }
+    .teal .btn-primary { background: #f4f0e8; color: #042f2e; }
+    .teal .btn-secondary {
+      color: #f4f0e8;
+      box-shadow: inset 0 0 0 1.5px rgba(244, 240, 232, 0.4);
+    }
+    .teal input {
+      background: rgba(244, 240, 232, 0.94);
+      color: #042f2e;
+      box-shadow: none;
+    }
+
+    .dont {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .dont li {
+      background: var(--app-card);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 14px;
+      box-shadow: inset 0 0 0 1px var(--app-panel-border);
+    }
+
+    pre {
+      margin: 0;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: var(--app-card);
+      box-shadow: inset 0 0 0 1px var(--app-panel-border);
+      font-family: var(--font-outfit);
+      font-size: 13px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    @media (max-width: 720px) {
+      main { padding: 24px 20px 64px; }
+      h1.page { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="bar">
+    <div class="mark">Lystly</div>
+    <div class="slide-well" data-index="0" id="modeWell" style="--slots:2">
+      <b class="slide-lid" aria-hidden="true"></b>
+      <button type="button" class="is-active" data-mode="light">Light</button>
+      <button type="button" data-mode="dark">Dark</button>
+    </div>
+  </header>
+
+  <main>
+    <p class="eyebrow">Agent handoff</p>
+    <h1 class="page">Design language</h1>
+    <p class="lede">Give an agent <code>docs/lystly-design-language.md</code> as the spec. This sheet is the specimen: Frost chrome, Outfit, pills, sliding lids. No liquid mesh.</p>
+
+    <div class="brief">
+      Implement the other site with this language. Body is Outfit. Product canvas is <code>#f2f2f7</code> (or <code>#111111</code> in dark). Primary actions are ink pills, not blue. Segmented controls are a charcoal well with a sliding lid. Auth or a full-bleed hero may use flat <code>#042f2e</code> and cream type — never a moving mesh or shader.
+    </div>
+
+    <h2>Frost tokens</h2>
+    <div class="swatches" id="swatches"></div>
+
+    <h2>Type</h2>
+    <div class="type-spec">
+      <p class="display">Listing posts in seconds.</p>
+      <p class="body">Outfit 400 on 16–18px, line-height 1.5, muted at 62% ink. Headlines are sentence case, tracking −0.04em. Eyebrows are 11px, 0.16em, uppercase.</p>
+    </div>
+
+    <h2>Controls</h2>
+    <div class="row">
+      <button class="btn-primary" type="button">Get started</button>
+      <button class="btn-secondary" type="button">Log in</button>
+      <button class="btn-danger" type="button">Delete</button>
+      <button class="btn-ghost" type="button">Settings</button>
+      <input type="search" placeholder="Search listings" />
+      <div class="slide-well" data-index="0" id="viewWell" style="--slots:2">
+        <b class="slide-lid" aria-hidden="true"></b>
+        <button type="button" class="is-active">Listing</button>
+        <button type="button">Brochure</button>
+      </div>
+    </div>
+
+    <h2>Cards</h2>
+    <div class="cards">
+      <article class="card">
+        <div>
+          <h3>District One Villas</h3>
+          <time>Updated today</time>
+        </div>
+        <div class="row">
+          <button class="btn-ghost" type="button">Open</button>
+        </div>
+      </article>
+      <article class="card">
+        <div>
+          <h3>Palm Jumeirah</h3>
+          <time>No listing link</time>
+        </div>
+        <div class="row">
+          <button class="btn-ghost" type="button">Open</button>
+        </div>
+      </article>
+    </div>
+
+    <div class="teal">
+      <p class="eyebrow" style="color: rgba(244,240,232,0.72)">Editorial surface</p>
+      <h2>Deep teal, no mesh</h2>
+      <p>Full-bleed pages use a flat <code>#042f2e</code> field. Type and buttons are cream. Do not put a liquid mesh, grain, or aurora behind this.</p>
+      <div class="row">
+        <input type="email" placeholder="Email" />
+        <button class="btn-primary" type="button">Create account</button>
+        <button class="btn-secondary" type="button">Log in</button>
+      </div>
+    </div>
+
+    <h2>Do not</h2>
+    <ul class="dont">
+      <li>No liquid mesh, shader, or animated gradient background.</li>
+      <li>No blue / purple CTAs. Accent is ink.</li>
+      <li>No Inter or system-ui. Outfit only for chrome.</li>
+      <li>No 4–8px corners on buttons. Pills or ~18px cards.</li>
+      <li>No mixing teal chrome onto a Frost page.</li>
+    </ul>
+
+    <h2>Give the agent this</h2>
+    <pre>Read docs/lystly-design-language.md and match Lystly exactly.
+No liquid mesh. Frost tokens. Outfit. Pill buttons. Slide-well + lid for segmented controls.</pre>
+  </main>
+
+  <script>
+    const LIGHT = [
+      ["#f2f2f7", "page", "--app-page"],
+      ["#ffffff", "card / bar", "--app-card"],
+      ["#111111", "ink / accent", "--app-page-type"],
+      ["#3a3a3c", "well", "--app-well"],
+      ["#ffffff", "lid", "--app-lid"],
+      ["#b42318", "danger", "--app-danger"],
+      ["#042f2e", "teal (editorial)", "flat only"],
+      ["#f4f0e8", "cream", "on teal"],
+    ];
+    const root = document.getElementById("swatches");
+    LIGHT.forEach(([hex, name, token]) => {
+      const el = document.createElement("div");
+      el.className = "swatch";
+      el.innerHTML = `<i style="background:${hex}"></i><p><strong>${name}</strong>${hex}<br>${token}</p>`;
+      root.appendChild(el);
+    });
+
+    function bindWell(id, onChange) {
+      const well = document.getElementById(id);
+      const buttons = [...well.querySelectorAll("button")];
+      buttons.forEach((btn, index) => {
+        btn.addEventListener("click", () => {
+          well.dataset.index = String(index);
+          buttons.forEach((b, i) => b.classList.toggle("is-active", i === index));
+          onChange?.(btn, index);
+        });
+      });
+    }
+    bindWell("modeWell", (btn) => {
+      document.documentElement.dataset.mode = btn.dataset.mode;
+    });
+    bindWell("viewWell");
+  </script>
+</body>
+</html>

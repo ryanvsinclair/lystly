@@ -205,6 +205,7 @@ export const StudioMarkup = memo(function StudioMarkup({ cutoutUrl = "", poses =
             </button>
           </div>
           <div className="stage-downloads" id="stageDownloads" data-step="closed">
+            <p className="download-status" id="downloadStatus" hidden aria-live="polite"></p>
             <button
               className="download-launch"
               id="downloadLaunch"
@@ -235,7 +236,6 @@ export const StudioMarkup = memo(function StudioMarkup({ cutoutUrl = "", poses =
                 </button>
               </div>
             </div>
-            <p className="download-status" id="downloadStatus" hidden></p>
           </div>
         </div>
         <div className="preview-wrap has-gallery" id="previewWrap">
@@ -287,27 +287,27 @@ export const StudioMarkup = memo(function StudioMarkup({ cutoutUrl = "", poses =
                     </div>
 
                     <div className="stats">
-                      <div className="stat">
+                      <div className="stat" data-stat="beds">
                         <span className="stat-icon" data-icon="bed"></span>
                         <Edit as="strong" className="is-edit" id="stat0Value" text="3" />
                         <Edit as="span" className="is-edit" id="stat0Label" text="Bedrooms" />
                       </div>
-                      <div className="stat">
+                      <div className="stat" data-stat="area">
                         <span className="stat-icon" data-icon="area"></span>
                         <Edit as="strong" className="is-edit" id="stat1Value" text="2,100" />
                         <Edit as="span" className="is-edit" id="stat1Label" text="Sq. Ft." />
                       </div>
-                      <div className="stat">
+                      <div className="stat" data-stat="price">
                         <span className="stat-icon" data-icon="coins"></span>
                         <Edit as="strong" className="is-edit" id="stat2Value" text="AED 165,000" />
                         <Edit as="span" className="is-edit" id="stat2Label" text="Annual Rent" />
                       </div>
-                      <div className="stat">
+                      <div className="stat" data-stat="cheques">
                         <span className="stat-icon" data-icon="doc"></span>
                         <Edit as="strong" className="is-edit" id="stat3Value" text="2" />
                         <Edit as="span" className="is-edit" id="stat3Label" text="Cheques" />
                       </div>
-                      <div className="stat">
+                      <div className="stat" data-stat="term">
                         <span className="stat-icon" data-icon="cal"></span>
                         <Edit as="strong" className="is-edit" id="stat4Value" text="1y+" />
                         <Edit as="span" className="is-edit" id="stat4Label" text="Lease Term" />

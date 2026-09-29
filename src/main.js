@@ -86,6 +86,7 @@ let featuresOverride = "";
 let previewMode = "listing";
 let pointerOverPreview = false;
 let activeHeadline = "just-leased";
+let rentalPriceLabel = "";
 let activeTemplate = "dock";
 let brochurePhotoOrder = [];
 let listingPhotoSource = "";
@@ -646,6 +647,17 @@ function updateComingDateDisplay() {
   });
 }
 
+function applySoldLayout(sold) {
+  listing?.classList.toggle("is-sold", sold);
+  const current = fieldValue("stat2Label");
+  if (sold) {
+    if (current && current !== "Price") rentalPriceLabel = current;
+    setField("stat2Label", "Price");
+    return;
+  }
+  if (current === "Price") setField("stat2Label", rentalPriceLabel || "Annual Rent");
+}
+
 function setHeadline(key) {
   const preset = HEADLINES[key];
   if (!preset) return;
@@ -653,6 +665,7 @@ function setHeadline(key) {
   setField("justWord", preset.kicker);
   setField("statusWord", preset.status);
   listing.classList.toggle("is-available-on", key === "available-on");
+  applySoldLayout(key === "just-sold");
   const comingMode = key === "coming-soon" || key === "available-on";
   comingSoonGroup?.classList.toggle("is-split", comingMode);
   const availableOn = statusPicker?.querySelector('[data-status="available-on"]');
@@ -749,9 +762,9 @@ function brochureData(listing = {}) {
     bathrooms: listing.bathrooms || "",
     area: fieldValue("stat1Value") || listing.area || "",
     plotArea: listing.plotArea || "",
-    cheques: fieldValue("stat3Value") || listing.cheques || "",
-    term: fieldValue("stat4Value") || listing.term || "",
-    termLabel: fieldValue("stat4Label") || listing.termLabel || "Lease Term",
+    cheques: activeHeadline === "just-sold" ? "" : fieldValue("stat3Value") || listing.cheques || "",
+    term: activeHeadline === "just-sold" ? "" : fieldValue("stat4Value") || listing.term || "",
+    termLabel: activeHeadline === "just-sold" ? "" : fieldValue("stat4Label") || listing.termLabel || "Lease Term",
     title: fieldValue("note") || listing.title || "",
     agentName: fieldValue("agentName") || brandAgentName || "",
     email: fieldValue("email") || brandEmail || "",
@@ -1605,11 +1618,8 @@ async function captureListingPng(pixelRatio = EXPORT_RATIO, extra = {}) {
 }
 
 async function downloadPng() {
-  const status = document.getElementById("downloadStatus");
   setDownloadBusy(true);
-  status.hidden = false;
-  status.classList.remove("is-error");
-  status.textContent = "Rendering image…";
+  setDownloadStatus("Rendering image…");
 
   try {
     const dataUrl = await captureListingPng();
@@ -1621,12 +1631,10 @@ async function downloadPng() {
       .replace(/[^a-z0-9]+/g, "-")}.png`;
     link.href = dataUrl;
     link.click();
-    status.classList.remove("is-error");
-    status.textContent = "Saved.";
+    setDownloadStatus("Saved.");
   } catch (err) {
     console.error(err);
-    status.classList.add("is-error");
-    status.textContent = "Could not export. Try another photo and download again.";
+    setDownloadStatus("Could not export. Try another photo and download again.", true);
   } finally {
     closeDownloadMenu();
     setDownloadBusy(false);
@@ -1823,8 +1831,38 @@ function downloadLaunch() {
   return document.getElementById("downloadLaunch");
 }
 
+function downloadStatusEl() {
+  return document.getElementById("downloadStatus");
+}
+
+function setDownloadStatus(message, isError = false) {
+  const status = downloadStatusEl();
+  if (!status) return;
+  status.classList.toggle("is-error", Boolean(isError));
+  status.textContent = message || "";
+  if (!message) {
+    status.classList.remove("is-on");
+    status.hidden = true;
+    return;
+  }
+  status.hidden = false;
+  if (status.classList.contains("is-on")) return;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => status.classList.add("is-on"));
+  });
+}
+
+function collapseDownloadStatus() {
+  const status = downloadStatusEl();
+  if (!status) return;
+  status.classList.remove("is-on");
+  status.hidden = true;
+}
+
 function setDownloadBusy(busy) {
+  const root = stageDownloads();
   const launch = downloadLaunch();
+  if (root) root.dataset.busy = busy ? "1" : "";
   if (launch) launch.disabled = busy;
   downloadButtons().forEach((btn) => {
     btn.disabled = busy;
@@ -1858,6 +1896,9 @@ function setDownloadStep(step) {
   if (root) root.dataset.step = step;
   if (launch) launch.setAttribute("aria-expanded", step === "closed" ? "false" : "true");
   if (stack) stack.setAttribute("aria-hidden", step === "closed" ? "true" : "false");
+  if ((step === "open" || step === "armed") && root?.dataset.busy !== "1") {
+    collapseDownloadStatus();
+  }
   downloadActions.forEach((action) => {
     const btn = document.getElementById(action.id);
     if (!btn) return;
@@ -1902,10 +1943,10 @@ function requestDownload(action) {
   action.run();
 }
 
-async function prepareBrochureData(status) {
+async function prepareBrochureData() {
   const url = document.getElementById("pfUrl").value.trim();
   if (url && lastListing?._url !== url) {
-    status.textContent = "Reading listing photos…";
+    setDownloadStatus("Reading listing photos…");
     applyListingToForm(await fetchListing(url));
   }
   const data = brochureData(lastListing || {});
@@ -2043,15 +2084,12 @@ async function captureBrochureListingImage() {
 }
 
 async function downloadBrochure() {
-  const status = document.getElementById("downloadStatus");
   setDownloadBusy(true);
-  status.hidden = false;
-  status.classList.remove("is-error");
-  status.textContent = "Preparing brochure…";
+  setDownloadStatus("Preparing brochure…");
 
   const wasBrochure = previewMode === "brochure";
   try {
-    const data = await prepareBrochureData(status);
+    const data = await prepareBrochureData();
     renderBrochurePreview();
     brochurePreview.style.position = "fixed";
     brochurePreview.style.left = "-4000px";
@@ -2059,7 +2097,7 @@ async function downloadBrochure() {
     brochurePreview.style.opacity = "0";
     brochurePreview.style.pointerEvents = "none";
     sizeBrochurePagesNative();
-    status.textContent = "Capturing listing page…";
+    setDownloadStatus("Capturing listing page…");
     let listingImage = "";
     try {
       listingImage = await captureBrochureListingImage();
@@ -2067,14 +2105,12 @@ async function downloadBrochure() {
       console.warn(err);
     }
     await buildBrochurePdf(data, (message) => {
-      status.textContent = message;
+      setDownloadStatus(message);
     }, listingImage);
-    status.classList.remove("is-error");
-    status.textContent = "Brochure saved.";
+    setDownloadStatus("Brochure saved.");
   } catch (err) {
     console.error(err);
-    status.classList.add("is-error");
-    status.textContent = brochureErrorMessage(err);
+    setDownloadStatus(brochureErrorMessage(err), true);
   } finally {
     brochurePreview.style.position = "";
     brochurePreview.style.left = "";
@@ -2088,15 +2124,12 @@ async function downloadBrochure() {
 }
 
 async function downloadBrochureImages() {
-  const status = document.getElementById("downloadStatus");
   setDownloadBusy(true);
-  status.hidden = false;
-  status.classList.remove("is-error");
-  status.textContent = "Preparing images…";
+  setDownloadStatus("Preparing images…");
 
   const wasBrochure = previewMode === "brochure";
   try {
-    const data = await prepareBrochureData(status);
+    const data = await prepareBrochureData();
     renderBrochurePreview();
     brochurePreview.style.position = "fixed";
     brochurePreview.style.left = "-4000px";
@@ -2119,25 +2152,23 @@ async function downloadBrochureImages() {
         page.closest(".brochure-sheet")?.querySelector("figcaption")?.textContent ||
         `Page ${i + 1}`
       ).replace(/[\\/:*?"<>|]+/g, "-");
-      status.textContent = `Capturing ${caption}…`;
+      setDownloadStatus(`Capturing ${caption}…`);
       const dataUrl = await captureBrochurePage(page);
       const blob = await (await fetch(dataUrl)).blob();
       folder.file(`${String(i + 1).padStart(pad, "0")} ${caption}.png`, blob);
     }
 
-    status.textContent = "Packing folder…";
+    setDownloadStatus("Packing folder…");
     const zipBlob = await zip.generateAsync({ type: "blob" });
     const link = document.createElement("a");
     link.download = `${stem}.zip`;
     link.href = URL.createObjectURL(zipBlob);
     link.click();
     URL.revokeObjectURL(link.href);
-    status.classList.remove("is-error");
-    status.textContent = "Image folder saved.";
+    setDownloadStatus("Image folder saved.");
   } catch (err) {
     console.error(err);
-    status.classList.add("is-error");
-    status.textContent = brochureErrorMessage(err);
+    setDownloadStatus(brochureErrorMessage(err), true);
   } finally {
     brochurePreview.style.position = "";
     brochurePreview.style.left = "";
@@ -2391,6 +2422,7 @@ export function applyStudioState(data = {}) {
     if (PROFILE_FIELDS.includes(id)) return;
     setField(id, value);
   });
+  if (activeHeadline === "just-sold") applySoldLayout(true);
   Object.entries(studio.colors || {}).forEach(([id, color]) => {
     const el = document.getElementById(id);
     if (el && color) el.style.color = color;
