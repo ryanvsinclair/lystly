@@ -1,4 +1,5 @@
 import { unsupportedListingMessage } from "@/lib/listing-sites.js";
+import { capListingPhotos } from "@/lib/listing-photos.js";
 
 const BROWSER_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
@@ -307,7 +308,7 @@ function uniquePhotos(urls) {
     seen.add(key);
     out.push(url);
   }
-  return out;
+  return capListingPhotos(out);
 }
 
 function isLikelyPhoto(url) {
@@ -1220,6 +1221,8 @@ export function extractListingFromHtml(html, rawUrl) {
   if (listing.photo && !listing.photos.includes(listing.photo)) {
     listing.photos.unshift(listing.photo);
   }
+  listing.photos = capListingPhotos(listing.photos);
+  listing.photo = listing.photos[0] || listing.photo || "";
   return listing;
 }
 

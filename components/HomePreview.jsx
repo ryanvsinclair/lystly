@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SlideToggle } from "@/components/SlideToggle";
 import { clampAgentPosition, listingPointerScale } from "@/lib/agent-drag.js";
+import { capListingPhotos } from "@/lib/listing-photos.js";
 
 const ICONS = {
   bed: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V9.5A1.5 1.5 0 0 1 4.5 8H8a3 3 0 0 1 3 3v1h10v6"/><path d="M3 14h18"/><path d="M5 18v2M19 18v2"/></svg>`,
@@ -147,7 +148,7 @@ function coverFacts(listing) {
 }
 
 function landingBrochurePages(listing) {
-  const photos = [...new Set([listing.photo, ...(listing.photos || [])].filter(Boolean))].slice(0, 8);
+  const photos = capListingPhotos([listing.photo, ...(listing.photos || [])]);
   const extra = photos.slice(1);
   const total = 1 + extra.length + 1;
   return [

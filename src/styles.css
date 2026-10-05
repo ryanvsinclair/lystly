@@ -2212,10 +2212,255 @@ select:focus-visible,
   display: none;
 }
 
-.listing.is-sold .stat[data-stat="price"],
+.listing.is-sold .stat[data-stat="price"] .stat-icon {
+  display: none;
+}
+
+.listing.is-sold .stat[data-stat="price"] span {
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.listing.is-sold.is-tpl-dock .kicker,
+.listing.is-sold.is-tpl-dock .status {
+  display: inline;
+  vertical-align: baseline;
+}
+
+.listing.is-sold.is-tpl-dock .kicker {
+  margin-right: 10px;
+  font-size: 28px;
+}
+
+.listing.is-sold.is-tpl-dock .status {
+  font-size: 52px;
+}
+
+.listing.is-sold.is-tpl-dock .pname {
+  display: block;
+  margin-top: 12px;
+}
+
+.listing.is-sold.is-tpl-dock .card:not(.card-top) {
+  height: 400px;
+}
+
+.listing.is-sold.is-tpl-dock .card-blur-clip img {
+  top: -650px;
+}
+
+.listing.is-sold.is-tpl-dock .card-body {
+  padding-top: 24px;
+  padding-bottom: 20px;
+}
+
+.listing.is-sold.is-tpl-dock .stats,
+.listing.is-sold.is-tpl-twin .stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "price price"
+    "beds area";
+  align-items: stretch;
+  gap: 0;
+  margin-top: 14px;
+  padding: 8px 8px 6px;
+}
+
+.listing.is-sold.is-tpl-dock .stat,
+.listing.is-sold.is-tpl-twin .stat {
+  border-right: 0;
+}
+
+.listing.is-sold.is-tpl-dock .stat[data-stat="price"],
+.listing.is-sold.is-tpl-twin .stat[data-stat="price"] {
+  grid-area: price;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 14px 14px;
+  border-bottom: 1px solid #d7deea;
+  text-align: left;
+}
+
+.listing.is-sold.is-tpl-dock .stat[data-stat="price"] span,
+.listing.is-sold.is-tpl-twin .stat[data-stat="price"] span {
+  order: 1;
+}
+
+.listing.is-sold.is-tpl-dock .stat[data-stat="price"] strong,
+.listing.is-sold.is-tpl-twin .stat[data-stat="price"] strong {
+  order: 2;
+  font-size: 28px;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+}
+
+.listing.is-sold.is-tpl-dock .stat[data-stat="beds"],
+.listing.is-sold.is-tpl-twin .stat[data-stat="beds"] {
+  grid-area: beds;
+  border-right: 1px solid #d7deea;
+}
+
+.listing.is-sold.is-tpl-dock .stat[data-stat="area"],
+.listing.is-sold.is-tpl-twin .stat[data-stat="area"] {
+  grid-area: area;
+}
+
+.listing.is-sold.is-tpl-twin .kicker {
+  right: 232px;
+  font-size: 40px;
+}
+
+.listing.is-sold.is-tpl-twin .status {
+  right: 48px;
+  font-size: 52px;
+}
+
+.listing.is-sold.is-tpl-editorial .headline {
+  text-shadow:
+    0 2px 18px rgba(8, 16, 36, 0.55),
+    0 8px 40px rgba(8, 16, 36, 0.45);
+}
+
+.listing.is-sold.is-tpl-editorial .kicker {
+  font-size: 42px;
+}
+
+.listing.is-sold.is-tpl-editorial .status {
+  font-size: 100px;
+  letter-spacing: -0.03em;
+}
+
+.listing.is-sold.is-tpl-editorial .stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) auto auto;
+  grid-template-areas: "price beds area";
+  align-items: center;
+  padding: 8px 6px;
+}
+
+.listing.is-sold.is-tpl-editorial .stat {
+  border-right: 0;
+}
+
+.listing.is-sold.is-tpl-editorial .stat[data-stat="price"] {
+  grid-area: price;
+  align-items: flex-start;
+  text-align: left;
+  padding: 0 12px 0 4px;
+  border-right: 1px solid rgba(8, 29, 86, 0.12);
+}
+
+.listing.is-sold.is-tpl-editorial .stat[data-stat="price"] strong {
+  font-size: 22px;
+  letter-spacing: -0.04em;
+}
+
+.listing.is-sold.is-tpl-editorial .stat[data-stat="beds"] {
+  grid-area: beds;
+  border-right: 1px solid rgba(8, 29, 86, 0.12);
+}
+
+.listing.is-sold.is-tpl-editorial .stat[data-stat="area"] {
+  grid-area: area;
+}
+
+.listing.is-sold.is-tpl-side .headline,
+.listing.is-sold.is-tpl-side .stats {
+  display: contents;
+}
+
+.listing.is-sold.is-tpl-side .card-body,
+.listing.is-sold.is-tpl-side.has-agent.pose-crossed .card-body,
+.listing.is-sold.is-tpl-side.has-agent.pose-presenting .card-body,
+.listing.is-sold.is-tpl-side.has-agent.pose-custom .card-body {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto auto auto auto auto 1fr;
+  grid-template-areas:
+    "kicker status"
+    "price price"
+    "name name"
+    "loc loc"
+    "note note"
+    "beds area"
+    "agent agent";
+  align-content: start;
+  row-gap: 0;
+}
+
+.listing.is-sold.is-tpl-side .kicker {
+  grid-area: kicker;
+  display: block;
+  align-self: end;
+  margin: 0 10px 0 0;
+  font-size: 28px;
+}
+
+.listing.is-sold.is-tpl-side .status {
+  grid-area: status;
+  display: block;
+  align-self: end;
+  font-size: 52px;
+}
+
+.listing.is-sold.is-tpl-side .pname {
+  grid-area: name;
+  display: block;
+  margin-top: 16px;
+}
+
+.listing.is-sold.is-tpl-side .ploc {
+  grid-area: loc;
+}
+
+.listing.is-sold.is-tpl-side .pnote {
+  grid-area: note;
+}
+
 .listing.is-sold.is-tpl-side .stat[data-stat="price"] {
+  grid-area: price;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 18px;
+  padding: 0 0 16px;
+  border-right: 0;
+  border-bottom: 1px solid rgba(8, 29, 86, 0.1);
+  text-align: left;
+}
+
+.listing.is-sold.is-tpl-side .stat[data-stat="price"] span {
+  order: 1;
+}
+
+.listing.is-sold.is-tpl-side .stat[data-stat="price"] strong {
+  order: 2;
+  font-size: 34px;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+}
+
+.listing.is-sold.is-tpl-side .stat[data-stat="beds"] {
+  grid-area: beds;
   border-right: 0;
   border-bottom: 0;
+  padding-top: 12px;
+}
+
+.listing.is-sold.is-tpl-side .stat[data-stat="area"] {
+  grid-area: area;
+  border-bottom: 0;
+  padding-top: 12px;
+}
+
+.listing.is-sold.is-tpl-side .agent-row {
+  grid-area: agent;
+  align-self: end;
+  margin-top: 20px;
 }
 
 .stat-icon {
@@ -2554,6 +2799,23 @@ select:focus-visible,
 .studio-page .status-picker .slide-well + .slide-well,
 .studio-page .template-picker .slide-well + .slide-well {
   margin-top: 8px;
+}
+
+.studio-page .status-picker .slide-well:has(> button:only-of-type) {
+  --slots: 1;
+}
+
+.studio-page .picker-kicker {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--app-control-muted);
+}
+
+.studio-page .status-picker .slide-well + .picker-kicker {
+  margin-top: 14px;
 }
 
 .studio-page .slide-well.is-pose {

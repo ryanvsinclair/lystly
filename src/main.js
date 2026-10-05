@@ -3,6 +3,7 @@ import { toPng } from "html-to-image";
 import JSZip from "jszip";
 import { clampAgentPosition, listingPointerScale } from "@/lib/agent-drag.js";
 import { unsupportedListingMessage } from "@/lib/listing-sites.js";
+import { MAX_LISTING_PHOTOS, capListingPhotos } from "@/lib/listing-photos.js";
 import { brochurePagePlan, buildBrochurePdf, filenameFrom, photoSrc } from "./brochure.js";
 
 const ICONS = {
@@ -650,12 +651,17 @@ function updateComingDateDisplay() {
 function applySoldLayout(sold) {
   listing?.classList.toggle("is-sold", sold);
   const current = fieldValue("stat2Label");
+  const note = fieldValue("note");
+  const leasedNote = "Leased within 4 days of listing.";
+  const soldNote = "Sold within 4 days of listing.";
   if (sold) {
     if (current && current !== "Price") rentalPriceLabel = current;
     setField("stat2Label", "Price");
+    if (note === leasedNote) setField("note", soldNote);
     return;
   }
   if (current === "Price") setField("stat2Label", rentalPriceLabel || "Annual Rent");
+  if (note === soldNote) setField("note", leasedNote);
 }
 
 function setHeadline(key) {
@@ -716,6 +722,9 @@ async function fetchListing(rawUrl) {
 }
 
 function applyListingToForm(listingData) {
+  if (Array.isArray(listingData.photos)) {
+    listingData.photos = capListingPhotos(listingData.photos);
+  }
   setField("propertyName", listingData.propertyName);
   setField("location", listingData.location);
   setField("note", listingData.title);
@@ -744,7 +753,7 @@ function brochureData(listing = {}) {
     : propertyUrl
       ? [propertyUrl]
       : [];
-  const photos = orderBrochurePhotos(rawPhotos);
+  const photos = capListingPhotos(orderBrochurePhotos(rawPhotos));
   return {
     propertyName: fieldValue("propertyName") || listing.propertyName || "",
     cluster: listing.cluster || fieldValue("propertyName") || listing.propertyName || "",
@@ -847,7 +856,7 @@ function setPhoto(url) {
 
 function listingGalleryPhotos() {
   const photos = lastListing?.photos;
-  return Array.isArray(photos) ? [...new Set(photos.filter(Boolean))] : [];
+  return Array.isArray(photos) ? capListingPhotos(photos) : [];
 }
 
 function listingPhotoIsActive(url) {
@@ -1011,7 +1020,7 @@ function compressPhotoDataUrl(dataUrl, maxEdge = 1600, quality = 0.82) {
 }
 
 function setListingPhotos(photos) {
-  const next = [...new Set((photos || []).filter(Boolean))];
+  const next = capListingPhotos(photos);
   lastListing = { ...(lastListing || {}), photos: next };
   if (!next.includes(lastListing.photo)) lastListing.photo = next[0] || "";
   brochurePhotoOrder = orderBrochurePhotos(next);
@@ -1177,8 +1186,17 @@ async function attachGalleryPhotos(files) {
   setGalleryAddBusy(true, images.length > 1 ? `Adding 1/${images.length}` : "Adding…");
   try {
     const next = listingGalleryPhotos();
+    if (next.length >= MAX_LISTING_PHOTOS) {
+      setPfStatus("You can use up to 35 photos.", true);
+      return;
+    }
     let added = 0;
+    let skipped = false;
     for (const [index, file] of images.entries()) {
+      if (next.length >= MAX_LISTING_PHOTOS) {
+        skipped = true;
+        break;
+      }
       if (images.length > 1) {
         setGalleryAddBusy(true, `Adding ${index + 1}/${images.length}`);
       }
@@ -1196,6 +1214,7 @@ async function attachGalleryPhotos(files) {
     if (!added) return;
     setListingPhotos(next);
     refreshGalleries();
+    if (skipped) setPfStatus("You can use up to 35 photos.", true);
     if (previewMode === "brochure") {
       const sheets = brochurePages?.querySelectorAll(".brochure-sheet");
       sheets?.[sheets.length - 1]?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -2356,6 +2375,7 @@ export async function getPersistableStudioState() {
   const state = getStudioState();
   const listing = await replaceEmbeddedPhotos(state.listing || {});
   const studio = await replaceEmbeddedPhotos(state.studio || {});
+  if (Array.isArray(listing.photos)) listing.photos = capListingPhotos(listing.photos);
   const copies = new Set(
     [listing.photo, ...(Array.isArray(listing.photos) ? listing.photos : [])].filter(Boolean)
   );

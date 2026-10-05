@@ -1,11 +1,11 @@
 import { jsPDF } from "jspdf";
+import { capListingPhotos } from "@/lib/listing-photos.js";
 
 const PAGE_W = 720;
 const PAGE_H = 521;
 const NAVY = [8, 29, 86];
 const ACCENT = [23, 84, 234];
 const MUTED = [51, 67, 111];
-const MAX_GALLERY = 16;
 
 function loadImage(src) {
   return new Promise((resolve, reject) => {
@@ -442,10 +442,7 @@ function savePdf(doc, filename) {
 }
 
 export function brochurePagePlan(data) {
-  const urls = [...new Set((data.photos || []).filter(Boolean))].slice(
-    0,
-    MAX_GALLERY
-  );
+  const urls = capListingPhotos(data.photos);
   const gallery = urls.slice(1);
   const total = 1 + gallery.length + 1;
   return {
@@ -479,10 +476,7 @@ export function brochurePagePlan(data) {
 
 export async function buildBrochurePdf(data, onProgress, listingImage) {
   imageAlias = 0;
-  const urls = [...new Set((data.photos || []).filter(Boolean))].slice(
-    0,
-    MAX_GALLERY
-  );
+  const urls = capListingPhotos(data.photos);
   if (!urls.length) {
     throw new Error("No listing photos to put in the brochure.");
   }

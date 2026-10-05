@@ -47,6 +47,13 @@ export const StudioMarkup = memo(function StudioMarkup({ cutoutUrl = "", poses =
         <section className="group">
           <h2>Header</h2>
           <div className="status-picker" id="statusPicker" role="listbox" aria-label="Listing header">
+            <p className="picker-kicker">Rental</p>
+            <div className="slide-well" id="statusRentJust" data-index="0" style={{ "--slots": "1" }}>
+              <b className="slide-lid" aria-hidden="true"></b>
+              <button type="button" className="status-card is-active" data-status="just-leased" aria-pressed="true">
+                Just leased
+              </button>
+            </div>
             <div className="slide-well" id="comingSoonGroup" data-index="-1">
               <b className="slide-lid" aria-hidden="true" hidden></b>
               <button type="button" className="status-card" data-status="coming-soon" aria-pressed="false">
@@ -60,11 +67,9 @@ export const StudioMarkup = memo(function StudioMarkup({ cutoutUrl = "", poses =
                 Available now
               </button>
             </div>
-            <div className="slide-well" id="statusJustGroup" data-index="0">
-              <b className="slide-lid" aria-hidden="true"></b>
-              <button type="button" className="status-card is-active" data-status="just-leased" aria-pressed="true">
-                Just leased
-              </button>
+            <p className="picker-kicker">Sale</p>
+            <div className="slide-well" id="statusSaleGroup" data-index="-1" style={{ "--slots": "1" }}>
+              <b className="slide-lid" aria-hidden="true" hidden></b>
               <button type="button" className="status-card" data-status="just-sold" aria-pressed="false">
                 Just sold
               </button>
