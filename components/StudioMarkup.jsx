@@ -18,6 +18,44 @@ function Edit({ as: Tag = "p", text = "", ...props }) {
   );
 }
 
+function GalleryRailHead() {
+  return (
+    <div className="listing-gallery-head">
+      <p className="listing-gallery-label">Photos</p>
+      <div className="listing-gallery-actions">
+        <button
+          type="button"
+          className="listing-gallery-remove listing-gallery-sort"
+          aria-label="Rearrange photos"
+          aria-haspopup="dialog"
+          hidden
+        >
+          <span className="listing-gallery-remove-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4" y="4" width="6.5" height="6.5" rx="1.4" />
+              <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.4" />
+              <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.4" />
+              <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.4" />
+            </svg>
+          </span>
+        </button>
+        <button type="button" className="listing-gallery-remove listing-gallery-clear" aria-label="Remove all photos" hidden>
+          <span className="listing-gallery-remove-icon listing-gallery-remove-x" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </span>
+          <span className="listing-gallery-remove-icon listing-gallery-remove-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m5 12.5 5 5 9-10" />
+            </svg>
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export const StudioMarkup = memo(function StudioMarkup({ cutoutUrl = "", poses = [] }) {
   return (
     <div className="app">
@@ -360,25 +398,55 @@ export const StudioMarkup = memo(function StudioMarkup({ cutoutUrl = "", poses =
             <div className="brochure-pages" id="brochurePages"></div>
           </div>
           <aside className="listing-gallery" id="listingGallery" aria-hidden="false">
-            <p className="listing-gallery-label">Photos</p>
-            <div className="listing-gallery-list" id="listingGalleryList"></div>
-            <label className="listing-gallery-add">
-              <input type="file" accept="image/*" multiple hidden />
-              <span className="listing-gallery-add-plus" aria-hidden="true">+</span>
-              <span>Add photo</span>
-            </label>
+            <GalleryRailHead />
+            <div className="listing-gallery-scroll">
+              <div className="listing-gallery-list" id="listingGalleryList"></div>
+              <label className="listing-gallery-add">
+                <input type="file" accept="image/*" multiple hidden />
+                <span className="listing-gallery-add-plus" aria-hidden="true">+</span>
+                <span>Add photo</span>
+              </label>
+            </div>
           </aside>
           <aside className="listing-gallery" id="brochureGallery" aria-hidden="true" inert>
-            <p className="listing-gallery-label">Photos</p>
-            <div className="listing-gallery-list" id="brochureGalleryList"></div>
-            <label className="listing-gallery-add">
-              <input type="file" accept="image/*" multiple hidden />
-              <span className="listing-gallery-add-plus" aria-hidden="true">+</span>
-              <span>Add photo</span>
-            </label>
+            <GalleryRailHead />
+            <div className="listing-gallery-scroll">
+              <div className="listing-gallery-list" id="brochureGalleryList"></div>
+              <label className="listing-gallery-add">
+                <input type="file" accept="image/*" multiple hidden />
+                <span className="listing-gallery-add-plus" aria-hidden="true">+</span>
+                <span>Add photo</span>
+              </label>
+            </div>
           </aside>
         </div>
       </main>
+      <div className="photo-sort" id="photoSort" hidden>
+        <button className="photo-sort-scrim" id="photoSortScrim" type="button" aria-label="Close"></button>
+        <div
+          className="photo-sort-panel"
+          id="photoSortPanel"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="photoSortTitle"
+          tabIndex={-1}
+        >
+          <header className="photo-sort-head">
+            <div>
+              <h2 id="photoSortTitle">Rearrange photos</h2>
+              <p className="photo-sort-note">Drag to set the order. The first photo is the cover.</p>
+            </div>
+            <button type="button" className="listing-gallery-remove listing-gallery-sort-close" id="photoSortClose" aria-label="Close">
+              <span className="listing-gallery-remove-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </span>
+            </button>
+          </header>
+          <div className="photo-sort-grid" id="photoSortGrid"></div>
+        </div>
+      </div>
     </div>
   );
 });

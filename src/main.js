@@ -323,8 +323,6 @@ function renderBrochurePage(page) {
   slot.append(frame);
   const caption = textEl("figcaption", "", page.caption);
   if (page.photo && page.type !== "listing") {
-    sheet.classList.add("is-sortable");
-    sheet.draggable = true;
     sheet.dataset.photo = page.photo;
   }
   sheet.append(slot, caption);
@@ -359,7 +357,6 @@ function renderBrochurePreview() {
   }
   brochurePreview.classList.remove("is-empty");
   brochurePages.append(...pages.map(renderBrochurePage));
-  bindBrochureDrag();
   bindBrochureAgentDrag();
   renderBrochureGallery();
   scaleBrochurePages();
@@ -377,59 +374,28 @@ function orderBrochurePhotos(urls) {
   return [...ordered, ...remaining];
 }
 
-function reorderBrochurePhoto(fromUrl, toUrl, after) {
-  if (!fromUrl || !toUrl || fromUrl === toUrl) return;
-  const photos = orderBrochurePhotos(brochureData(lastListing || {}).photos);
-  const from = photos.indexOf(fromUrl);
-  let to = photos.indexOf(toUrl);
-  if (from < 0 || to < 0) return;
-  const [moved] = photos.splice(from, 1);
-  if (from < to) to -= 1;
-  photos.splice(after ? to + 1 : to, 0, moved);
+function orderedListingPhotos() {
+  return orderBrochurePhotos(listingGalleryPhotos());
+}
+
+function applyPhotoOrder(urls) {
+  const photos = capListingPhotos(urls);
   brochurePhotoOrder = photos;
-  renderBrochurePreview();
+  setListingPhotos(photos);
+  refreshGalleries();
+  if (isPhotoSortOpen()) renderPhotoSortGrid();
   studioHooks.onChange?.();
 }
 
-function bindBrochureDrag() {
-  brochurePages.querySelectorAll(".brochure-sheet.is-sortable").forEach((sheet) => {
-    sheet.addEventListener("pointerdown", (e) => {
-      sheet.draggable = !e.target.closest(".is-edit");
-    });
-    sheet.addEventListener("dragstart", (e) => {
-      if (!sheet.draggable) {
-        e.preventDefault();
-        return;
-      }
-      e.dataTransfer.setData("text/plain", sheet.dataset.photo || "");
-      e.dataTransfer.effectAllowed = "move";
-      sheet.classList.add("is-dragging");
-    });
-    sheet.addEventListener("dragend", () => {
-      sheet.classList.remove("is-dragging");
-      brochurePages.querySelectorAll(".drop-before, .drop-after").forEach((node) => {
-        node.classList.remove("drop-before", "drop-after");
-      });
-    });
-    sheet.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      const box = sheet.getBoundingClientRect();
-      const after = e.clientY > box.top + box.height / 2;
-      sheet.classList.toggle("drop-after", after);
-      sheet.classList.toggle("drop-before", !after);
-    });
-    sheet.addEventListener("dragleave", (e) => {
-      if (sheet.contains(e.relatedTarget)) return;
-      sheet.classList.remove("drop-before", "drop-after");
-    });
-    sheet.addEventListener("drop", (e) => {
-      e.preventDefault();
-      const box = sheet.getBoundingClientRect();
-      const after = e.clientY > box.top + box.height / 2;
-      sheet.classList.remove("drop-before", "drop-after");
-      reorderBrochurePhoto(e.dataTransfer.getData("text/plain"), sheet.dataset.photo, after);
-    });
-  });
+function movePhotoInOrder(fromUrl, toUrl) {
+  if (!fromUrl || !toUrl || fromUrl === toUrl) return;
+  const photos = orderedListingPhotos();
+  const from = photos.indexOf(fromUrl);
+  const to = photos.indexOf(toUrl);
+  if (from < 0 || to < 0) return;
+  const [moved] = photos.splice(from, 1);
+  photos.splice(to, 0, moved);
+  applyPhotoOrder(photos);
 }
 
 function setPreviewPaneState(el, active) {
@@ -874,6 +840,7 @@ function syncGalleryLayout() {
   const brochureRail = document.getElementById("brochureGallery");
   setPreviewPaneState(listingRail, previewMode === "listing");
   setPreviewPaneState(brochureRail, previewMode === "brochure");
+  syncGalleryHeadButtons();
 }
 
 function renderBrochureGallery() {
@@ -891,13 +858,10 @@ function renderBrochureGallery() {
     ...photos.map((url, index) => {
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "listing-gallery-item is-sortable";
-      btn.draggable = true;
-      btn.dataset.photo = url;
+      btn.className = "listing-gallery-item";
       btn.setAttribute("aria-label", index === 0 ? "Cover photo" : `Photo ${index + 1}`);
       const img = document.createElement("img");
       img.alt = "";
-      img.draggable = false;
       img.src = photoSrc(url);
       btn.append(img);
       if (index === 0) {
@@ -906,43 +870,8 @@ function renderBrochureGallery() {
         badge.textContent = "Cover";
         btn.append(badge);
       }
-      let dragged = false;
       btn.addEventListener("click", () => {
-        if (dragged) {
-          dragged = false;
-          return;
-        }
         scrollBrochureToPhoto(index);
-      });
-      btn.addEventListener("dragstart", (event) => {
-        dragged = true;
-        event.dataTransfer.setData("text/plain", url);
-        event.dataTransfer.effectAllowed = "move";
-        btn.classList.add("is-dragging");
-      });
-      btn.addEventListener("dragend", () => {
-        btn.classList.remove("is-dragging");
-        list.querySelectorAll(".drop-before, .drop-after").forEach((node) => {
-          node.classList.remove("drop-before", "drop-after");
-        });
-      });
-      btn.addEventListener("dragover", (event) => {
-        event.preventDefault();
-        const box = btn.getBoundingClientRect();
-        const after = event.clientY > box.top + box.height / 2;
-        btn.classList.toggle("drop-after", after);
-        btn.classList.toggle("drop-before", !after);
-      });
-      btn.addEventListener("dragleave", (event) => {
-        if (btn.contains(event.relatedTarget)) return;
-        btn.classList.remove("drop-before", "drop-after");
-      });
-      btn.addEventListener("drop", (event) => {
-        event.preventDefault();
-        const box = btn.getBoundingClientRect();
-        const after = event.clientY > box.top + box.height / 2;
-        btn.classList.remove("drop-before", "drop-after");
-        reorderBrochurePhoto(event.dataTransfer.getData("text/plain"), url, after);
       });
       return wrapGalleryThumb(btn, url);
     })
@@ -951,14 +880,14 @@ function renderBrochureGallery() {
 }
 
 function scrollBrochureToPhoto(index) {
-  const sheets = [...brochurePages.querySelectorAll(".brochure-sheet.is-sortable")];
+  const sheets = [...brochurePages.querySelectorAll(".brochure-sheet[data-photo]")];
   sheets[index]?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function renderListingGallery() {
   const rail = document.getElementById("listingGallery");
   const list = document.getElementById("listingGalleryList");
-  const photos = listingGalleryPhotos();
+  const photos = orderedListingPhotos();
   const show = previewMode === "listing";
   if (!show) {
     syncGalleryLayout();
@@ -1066,6 +995,186 @@ function wrapGalleryThumb(item, url) {
     remove.setAttribute("aria-label", "Remove photo");
   });
   return wrap;
+}
+
+const CLEAR_PHOTOS_LABEL = "Remove all photos";
+const CLEAR_PHOTOS_CONFIRM = "Confirm remove all photos";
+
+function disarmGalleryClear(btn) {
+  if (!btn) return;
+  btn.classList.remove("is-confirm");
+  btn.setAttribute("aria-label", CLEAR_PHOTOS_LABEL);
+}
+
+function syncGalleryHeadButtons() {
+  const count = orderedListingPhotos().length;
+  document.querySelectorAll(".listing-gallery-clear").forEach((btn) => {
+    btn.hidden = count < 1;
+    if (count < 1) disarmGalleryClear(btn);
+  });
+  document.querySelectorAll(".listing-gallery-sort").forEach((btn) => {
+    btn.hidden = count < 2;
+  });
+  if (count < 2) closePhotoSort();
+}
+
+function photoSortRoot() {
+  return document.getElementById("photoSort");
+}
+
+function isPhotoSortOpen() {
+  const root = photoSortRoot();
+  return Boolean(root && !root.hidden);
+}
+
+let photoSortOpener = null;
+
+function closePhotoSort() {
+  const root = photoSortRoot();
+  if (!root || root.hidden) return;
+  root.hidden = true;
+  document.querySelectorAll(".app > .panel, .app > .stage").forEach((el) => {
+    el.inert = false;
+  });
+  const opener = photoSortOpener;
+  photoSortOpener = null;
+  if (opener?.isConnected) opener.focus();
+}
+
+function renderPhotoSortGrid() {
+  const grid = document.getElementById("photoSortGrid");
+  if (!grid) return;
+  const photos = orderedListingPhotos();
+  grid.replaceChildren(
+    ...photos.map((url, index) => {
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = "photo-sort-tile";
+      tile.draggable = true;
+      tile.dataset.photo = url;
+      tile.setAttribute("aria-label", index === 0 ? "Cover photo" : `Photo ${index + 1}`);
+      const img = document.createElement("img");
+      img.alt = "";
+      img.draggable = false;
+      img.src = photoSrc(url);
+      const indexEl = document.createElement("span");
+      indexEl.className = "photo-sort-index";
+      indexEl.textContent = String(index + 1);
+      tile.append(img, indexEl);
+      if (index === 0) {
+        const badge = document.createElement("span");
+        badge.className = "listing-gallery-badge";
+        badge.textContent = "Cover";
+        tile.append(badge);
+      }
+      tile.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("text/plain", url);
+        event.dataTransfer.effectAllowed = "move";
+        tile.classList.add("is-dragging");
+      });
+      tile.addEventListener("dragend", () => {
+        tile.classList.remove("is-dragging");
+        grid.querySelectorAll(".is-over").forEach((node) => node.classList.remove("is-over"));
+      });
+      tile.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+        if (!tile.classList.contains("is-dragging")) tile.classList.add("is-over");
+      });
+      tile.addEventListener("dragleave", (event) => {
+        if (tile.contains(event.relatedTarget)) return;
+        tile.classList.remove("is-over");
+      });
+      tile.addEventListener("drop", (event) => {
+        event.preventDefault();
+        tile.classList.remove("is-over");
+        movePhotoInOrder(event.dataTransfer.getData("text/plain"), url);
+      });
+      return tile;
+    })
+  );
+}
+
+function openPhotoSort(opener) {
+  const root = photoSortRoot();
+  const panel = document.getElementById("photoSortPanel");
+  if (!root || orderedListingPhotos().length < 2) return;
+  photoSortOpener = opener || null;
+  root.hidden = false;
+  document.querySelectorAll(".app > .panel, .app > .stage").forEach((el) => {
+    el.inert = true;
+  });
+  renderPhotoSortGrid();
+  panel?.focus();
+}
+
+function bindPhotoSort() {
+  const root = photoSortRoot();
+  if (!root) return;
+  document.querySelectorAll(".listing-gallery-sort").forEach((btn) => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = "true";
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      openPhotoSort(btn);
+    });
+  });
+  const close = document.getElementById("photoSortClose");
+  const scrim = document.getElementById("photoSortScrim");
+  if (close && !close.dataset.bound) {
+    close.dataset.bound = "true";
+    close.addEventListener("click", () => closePhotoSort());
+  }
+  if (scrim && !scrim.dataset.bound) {
+    scrim.dataset.bound = "true";
+    scrim.addEventListener("click", () => closePhotoSort());
+  }
+  listen(document, "keydown", (event) => {
+    if (event.key !== "Escape" || !isPhotoSortOpen()) return;
+    event.preventDefault();
+    closePhotoSort();
+  });
+}
+
+function clearAllGalleryPhotos() {
+  if (!listingGalleryPhotos().length) return;
+  if (propertyObjectUrl) {
+    URL.revokeObjectURL(propertyObjectUrl);
+    propertyObjectUrl = "";
+  }
+  listingPhotoSource = "";
+  setListingPhotos([]);
+  setPhoto(PLACEHOLDER);
+  const name = document.getElementById("propertyFileName");
+  if (name) name.textContent = "No photo";
+  document.querySelectorAll(".listing-gallery-clear").forEach(disarmGalleryClear);
+  closePhotoSort();
+  refreshGalleries();
+  studioHooks.onChange?.();
+}
+
+function bindGalleryClears() {
+  document.querySelectorAll(".listing-gallery-clear").forEach((btn) => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = "true";
+    const head = btn.closest(".listing-gallery-head");
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!listingGalleryPhotos().length) return;
+      if (btn.classList.contains("is-confirm")) {
+        clearAllGalleryPhotos();
+        return;
+      }
+      document.querySelectorAll(".listing-gallery-clear").forEach((other) => {
+        if (other !== btn) disarmGalleryClear(other);
+      });
+      btn.classList.add("is-confirm");
+      btn.setAttribute("aria-label", CLEAR_PHOTOS_CONFIRM);
+    });
+    head?.addEventListener("mouseleave", () => disarmGalleryClear(btn));
+  });
 }
 
 function setGalleryAddBusy(busy, progress = "") {
@@ -1832,6 +1941,8 @@ listen(previewSwitch, "click", (e) => {
 listen(agentScaleInput, "input", applyAgentLayout);
 bindAgentDrag();
 bindGalleryAdds();
+bindGalleryClears();
+bindPhotoSort();
 }
 
 function downloadButtons() {
