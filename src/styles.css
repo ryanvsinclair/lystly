@@ -1509,7 +1509,7 @@ select:focus-visible,
   margin-left: -540px;
   background: transparent;
   overflow: hidden;
-  transform: scale(0.4824);
+  transform: scale(calc(521 / 1080));
   transform-origin: top center;
 }
 
@@ -1760,6 +1760,18 @@ select:focus-visible,
   transform-origin: top left;
   font-family: var(--font-montserrat), Montserrat, sans-serif;
   color: var(--navy);
+}
+
+/* html-to-image clones the listing off .studio-shell / .home-preview-wrap,
+   which is where margin and box-sizing were reset. Keep those on .listing
+   so the stats row still fits the 1080 square in brochure downloads. */
+.listing,
+.listing * {
+  box-sizing: border-box;
+}
+
+.listing :where(p) {
+  margin: 0;
 }
 
 .listing-bg,
@@ -2315,7 +2327,7 @@ select:focus-visible,
 }
 
 .listing.is-exporting .card-body {
-  overflow: hidden;
+  overflow: visible;
 }
 
 .listing.is-exporting.is-tpl-editorial .card,

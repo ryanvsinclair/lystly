@@ -1686,22 +1686,45 @@ async function toPngSafe(node, options) {
   }
 }
 
-async function withInlinedImages(root, run) {
-  const originals = [...root.querySelectorAll("img")].map((img) => [
-    img,
-    img.getAttribute("src"),
-  ]);
-  try {
-    await inlineCloneImages(root);
-    return await run();
-  } finally {
-    originals.forEach(([img, src]) => {
-      if (src != null) img.setAttribute("src", src);
+async function captureListingPng(pixelRatio = EXPORT_RATIO, extra = {}) {
+  // Snapshot a full-size clone. The live listing is scaled (and hidden on
+  // the brochure tab), so capturing it in place clips the stats row.
+  const host = document.createElement("div");
+  host.setAttribute("aria-hidden", "true");
+  host.style.cssText = [
+    "position:fixed",
+    "left:-8000px",
+    "top:0",
+    `width:${LAYOUT_SIZE}px`,
+    `height:${LAYOUT_SIZE}px`,
+    "overflow:hidden",
+    "pointer-events:none",
+    extra.background ? `background:${extra.background}` : "background:transparent",
+  ].join(";");
+
+  const clone = listing.cloneNode(true);
+  clone.removeAttribute("id");
+  clone.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+  clone.classList.add("is-exporting");
+  clone.style.transform = "none";
+  clone.style.transformOrigin = "top left";
+  clone.style.width = `${LAYOUT_SIZE}px`;
+  clone.style.height = `${LAYOUT_SIZE}px`;
+  clone.style.margin = "0";
+  clone.style.left = "0";
+  clone.style.top = "0";
+  clone.style.position = "relative";
+  clone.style.overflow = "hidden";
+  if (extra.background) clone.style.background = extra.background;
+  if (extra.hideBackground) {
+    clone.querySelectorAll(".listing-bg, .bg-fallback").forEach((el) => {
+      el.style.display = "none";
     });
   }
-}
+  host.append(clone);
+  document.body.append(host);
+  document.activeElement?.blur?.();
 
-async function captureListingPng(pixelRatio = EXPORT_RATIO, extra = {}) {
   const exportOptions = {
     width: LAYOUT_SIZE,
     height: LAYOUT_SIZE,
@@ -1709,39 +1732,19 @@ async function captureListingPng(pixelRatio = EXPORT_RATIO, extra = {}) {
     backgroundColor: extra.backgroundColor,
     style: {
       transform: "none",
-      transformOrigin: "top left",
       width: `${LAYOUT_SIZE}px`,
       height: `${LAYOUT_SIZE}px`,
-      ...(extra.background ? { background: extra.background } : {}),
+      overflow: "hidden",
+      margin: "0",
     },
   };
 
-  const offscreen = previewMode === "brochure";
-  if (offscreen) {
-    previewFrame.style.position = "fixed";
-    previewFrame.style.left = "-2000px";
-    previewFrame.style.top = "0";
-    previewFrame.style.opacity = "0";
-    previewFrame.style.pointerEvents = "none";
-  }
-
-  document.activeElement?.blur?.();
-  listing.classList.add("is-exporting");
-
   try {
     await document.fonts.ready;
-    // Export the agent exactly where it was dragged; the listing clips overflow.
-    return await withInlinedImages(listing, () => toPngSafe(listing, exportOptions));
+    await inlineCloneImages(clone);
+    return await toPngSafe(host, exportOptions);
   } finally {
-    listing.classList.remove("is-exporting");
-    if (offscreen) {
-      previewFrame.style.position = "";
-      previewFrame.style.left = "";
-      previewFrame.style.top = "";
-      previewFrame.style.opacity = "";
-      previewFrame.style.pointerEvents = "";
-    }
-    if (previewMode === "listing") scalePreview();
+    host.remove();
   }
 }
 
@@ -2127,10 +2130,12 @@ async function captureBrochurePage(pageEl) {
       transformOrigin: "top left",
       width: `${BROCHURE_W}px`,
       height: `${BROCHURE_H}px`,
+      overflow: "hidden",
+      margin: "0",
     },
   };
   const host = document.createElement("div");
-  host.style.cssText = `position:fixed;left:-8000px;top:0;width:${BROCHURE_W}px;height:${BROCHURE_H}px;overflow:hidden;`;
+  host.style.cssText = `position:fixed;left:-8000px;top:0;width:${BROCHURE_W}px;height:${BROCHURE_H}px;overflow:hidden;margin:0;padding:0;`;
   const clone = pageEl.cloneNode(true);
   clone.style.transform = "none";
   clone.style.position = "relative";
@@ -2152,7 +2157,7 @@ async function captureBrochurePage(pageEl) {
   try {
     await document.fonts.ready;
     await inlineCloneImages(clone);
-    return await toPngSafe(clone, options);
+    return await toPngSafe(host, options);
   } catch (err) {
     throw new Error(brochureErrorMessage(err));
   } finally {
@@ -2175,13 +2180,11 @@ async function captureBrochureListingImage() {
     page?.querySelector(".bp-photo")?.currentSrc ||
     page?.querySelector(".bp-photo")?.src ||
     propertyUrl;
-  const bg = listing.querySelector(".listing-bg");
-  const prevDisplay = bg ? bg.style.display : "";
-  if (bg) bg.style.display = "none";
   try {
     const overlayUrl = await captureListingPng(2, {
       backgroundColor: null,
       background: "transparent",
+      hideBackground: true,
     });
     const canvas = document.createElement("canvas");
     const px = 2;
@@ -2208,8 +2211,6 @@ async function captureBrochureListingImage() {
   } catch (err) {
     console.warn(err);
     return "";
-  } finally {
-    if (bg) bg.style.display = prevDisplay;
   }
 }
 
