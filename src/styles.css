@@ -2320,6 +2320,15 @@ select:focus-visible,
   overflow: hidden;
 }
 
+/* html-to-image blanks nodes with CSS filter/mask, which dropped the
+   listing overlay from the brochure PDF and left a plain photo page. */
+.listing.is-exporting .card-blur-clip {
+  filter: none;
+  -webkit-filter: none;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
 .listing.is-exporting .card,
 .listing.is-exporting .card-face {
   overflow: hidden;

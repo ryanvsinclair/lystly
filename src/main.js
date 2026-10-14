@@ -1716,11 +1716,6 @@ async function captureListingPng(pixelRatio = EXPORT_RATIO, extra = {}) {
   clone.style.position = "relative";
   clone.style.overflow = "hidden";
   if (extra.background) clone.style.background = extra.background;
-  if (extra.hideBackground) {
-    clone.querySelectorAll(".listing-bg, .bg-fallback").forEach((el) => {
-      el.style.display = "none";
-    });
-  }
   host.append(clone);
   document.body.append(host);
   document.activeElement?.blur?.();
@@ -2165,49 +2160,11 @@ async function captureBrochurePage(pageEl) {
   }
 }
 
-function loadCaptureImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Could not load a listing photo."));
-    img.src = src;
-  });
-}
-
 async function captureBrochureListingImage() {
   const page = brochurePages.querySelector(".brochure-page.is-square");
-  const photoSrcValue =
-    page?.querySelector(".bp-photo")?.currentSrc ||
-    page?.querySelector(".bp-photo")?.src ||
-    propertyUrl;
+  if (!page) return "";
   try {
-    const overlayUrl = await captureListingPng(2, {
-      backgroundColor: null,
-      background: "transparent",
-      hideBackground: true,
-    });
-    const canvas = document.createElement("canvas");
-    const px = 2;
-    canvas.width = BROCHURE_W * px;
-    canvas.height = BROCHURE_H * px;
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#081d56";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (photoSrcValue && photoSrcValue !== PLACEHOLDER) {
-      try {
-        const photo = await loadCaptureImage(photoSrcValue);
-        const cover = Math.max(canvas.width / photo.naturalWidth, canvas.height / photo.naturalHeight);
-        const dw = photo.naturalWidth * cover;
-        const dh = photo.naturalHeight * cover;
-        ctx.drawImage(photo, (canvas.width - dw) / 2, (canvas.height - dh) / 2, dw, dh);
-      } catch {
-        /* keep the navy fill */
-      }
-    }
-    const overlay = await loadCaptureImage(overlayUrl);
-    const side = canvas.height;
-    ctx.drawImage(overlay, (canvas.width - side) / 2, 0, side, side);
-    return canvas.toDataURL("image/png");
+    return await captureBrochurePage(page);
   } catch (err) {
     console.warn(err);
     return "";
