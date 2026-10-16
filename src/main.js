@@ -1686,21 +1686,66 @@ async function toPngSafe(node, options) {
   }
 }
 
+function placeCaptureHost(host, width, height, background) {
+  host.setAttribute("aria-hidden", "true");
+  // Keep the node in the viewport so html-to-image can paint it. Off-screen
+  // hosts (and transparent roots) were producing empty PNGs.
+  host.style.cssText = [
+    "position:fixed",
+    "left:0",
+    "top:0",
+    `width:${width}px`,
+    `height:${height}px`,
+    "overflow:hidden",
+    "pointer-events:none",
+    "z-index:2147483646",
+    `background:${background || "#cfe0f5"}`,
+  ].join(";");
+}
+
+function loadCaptureImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    if (src && !src.startsWith("data:") && !src.startsWith("blob:")) {
+      img.crossOrigin = "anonymous";
+    }
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Could not load a listing photo."));
+    img.src = src;
+  });
+}
+
+function imageHasInk(img) {
+  const probe = document.createElement("canvas");
+  probe.width = 48;
+  probe.height = 48;
+  const ctx = probe.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0, 48, 48);
+  const data = ctx.getImageData(0, 0, 48, 48).data;
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] > 12) return true;
+  }
+  return false;
+}
+
+async function drawCoverPhoto(ctx, src, width, height) {
+  if (!src || src === PLACEHOLDER) return;
+  try {
+    const photo = await loadCaptureImage(src);
+    const cover = Math.max(width / photo.naturalWidth, height / photo.naturalHeight);
+    const dw = photo.naturalWidth * cover;
+    const dh = photo.naturalHeight * cover;
+    ctx.drawImage(photo, (width - dw) / 2, (height - dh) / 2, dw, dh);
+  } catch {
+    /* keep the existing fill */
+  }
+}
+
 async function captureListingPng(pixelRatio = EXPORT_RATIO, extra = {}) {
   // Snapshot a full-size clone. The live listing is scaled (and hidden on
   // the brochure tab), so capturing it in place clips the stats row.
   const host = document.createElement("div");
-  host.setAttribute("aria-hidden", "true");
-  host.style.cssText = [
-    "position:fixed",
-    "left:-8000px",
-    "top:0",
-    `width:${LAYOUT_SIZE}px`,
-    `height:${LAYOUT_SIZE}px`,
-    "overflow:hidden",
-    "pointer-events:none",
-    extra.background ? `background:${extra.background}` : "background:transparent",
-  ].join(";");
+  placeCaptureHost(host, LAYOUT_SIZE, LAYOUT_SIZE, extra.background || "#cfe0f5");
 
   const clone = listing.cloneNode(true);
   clone.removeAttribute("id");
@@ -1724,7 +1769,7 @@ async function captureListingPng(pixelRatio = EXPORT_RATIO, extra = {}) {
     width: LAYOUT_SIZE,
     height: LAYOUT_SIZE,
     pixelRatio,
-    backgroundColor: extra.backgroundColor,
+    backgroundColor: extra.backgroundColor || "#cfe0f5",
     style: {
       transform: "none",
       width: `${LAYOUT_SIZE}px`,
@@ -1737,7 +1782,7 @@ async function captureListingPng(pixelRatio = EXPORT_RATIO, extra = {}) {
   try {
     await document.fonts.ready;
     await inlineCloneImages(clone);
-    return await toPngSafe(host, exportOptions);
+    return await toPngSafe(clone, exportOptions);
   } finally {
     host.remove();
   }
@@ -2130,7 +2175,7 @@ async function captureBrochurePage(pageEl) {
     },
   };
   const host = document.createElement("div");
-  host.style.cssText = `position:fixed;left:-8000px;top:0;width:${BROCHURE_W}px;height:${BROCHURE_H}px;overflow:hidden;margin:0;padding:0;`;
+  placeCaptureHost(host, BROCHURE_W, BROCHURE_H, "#cfe0f5");
   const clone = pageEl.cloneNode(true);
   clone.style.transform = "none";
   clone.style.position = "relative";
@@ -2152,7 +2197,7 @@ async function captureBrochurePage(pageEl) {
   try {
     await document.fonts.ready;
     await inlineCloneImages(clone);
-    return await toPngSafe(host, options);
+    return await toPngSafe(clone, options);
   } catch (err) {
     throw new Error(brochureErrorMessage(err));
   } finally {
@@ -2162,13 +2207,31 @@ async function captureBrochurePage(pageEl) {
 
 async function captureBrochureListingImage() {
   const page = brochurePages.querySelector(".brochure-page.is-square");
-  if (!page) return "";
+  const photoSrcValue =
+    page?.querySelector(".bp-photo")?.currentSrc ||
+    page?.querySelector(".bp-photo")?.src ||
+    propertyUrl;
+
+  const canvas = document.createElement("canvas");
+  const px = 2;
+  canvas.width = BROCHURE_W * px;
+  canvas.height = BROCHURE_H * px;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#081d56";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  await drawCoverPhoto(ctx, photoSrcValue, canvas.width, canvas.height);
+
   try {
-    return await captureBrochurePage(page);
+    const listingUrl = await captureListingPng(2);
+    const listingImg = await loadCaptureImage(listingUrl);
+    if (imageHasInk(listingImg)) {
+      const side = canvas.height;
+      ctx.drawImage(listingImg, (canvas.width - side) / 2, 0, side, side);
+    }
   } catch (err) {
     console.warn(err);
-    return "";
   }
+  return canvas.toDataURL("image/png");
 }
 
 async function downloadBrochure() {
@@ -2182,7 +2245,6 @@ async function downloadBrochure() {
     brochurePreview.style.position = "fixed";
     brochurePreview.style.left = "-4000px";
     brochurePreview.style.top = "0";
-    brochurePreview.style.opacity = "0";
     brochurePreview.style.pointerEvents = "none";
     sizeBrochurePagesNative();
     setDownloadStatus("Capturing listing page…");
@@ -2222,7 +2284,6 @@ async function downloadBrochureImages() {
     brochurePreview.style.position = "fixed";
     brochurePreview.style.left = "-4000px";
     brochurePreview.style.top = "0";
-    brochurePreview.style.opacity = "0";
     brochurePreview.style.pointerEvents = "none";
     sizeBrochurePagesNative();
 
